@@ -1,0 +1,586 @@
+<title>Bricklayer — Product Model &amp; IA</title>
+<style>
+:root{
+  /* Voltagent surface + brand */
+  --canvas:#101010; --canvas-soft:#1a1a1a; --canvas-2:#141414;
+  --hairline:#3d3a39; --hairline-2:#2a2827;
+  --primary:#00d992; --primary-soft:#2fd6a1; --primary-deep:#10b981; --on-primary:#101010;
+  --ink-strong:#ffffff; --ink:#f2f2f2; --body:#bdbdbd; --mute:#8b949e;
+  /* semantic (separate from brand green) */
+  --up:#3fd07f; --down:#ff6b6b; --watch:#ffb84d; --crit:#ff5d5d; --info:#4ea8ff;
+  /* categorical data-viz palette (reads on #101010) */
+  --c1:#00d992; --c2:#4ea8ff; --c3:#b98cff; --c4:#ffb84d; --c5:#ff7a8a; --c6:#38d6c4; --c7:#d4d867; --c8:#8b9bb4;
+  --grid:#2a2827;
+  --font:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"SFMono-Regular",Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+  --r-sm:6px; --r-md:8px; --r-pill:9999px;
+  --maxw:1200px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--canvas);color:var(--ink);
+  font-family:var(--font);font-size:16px;line-height:1.65;
+  font-feature-settings:"calt","rlig";-webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4{margin:0;font-weight:400;letter-spacing:-.02em;color:var(--ink-strong);text-wrap:balance}
+h1{font-size:clamp(34px,5vw,60px);line-height:1.02;letter-spacing:-.025em}
+h2{font-size:clamp(26px,3.2vw,36px);line-height:1.1;letter-spacing:-.025em}
+h3{font-size:22px;font-weight:600;line-height:1.25}
+h4{font-size:16px;font-weight:600;color:var(--ink)}
+p{margin:0}
+a{color:var(--primary-deep);text-decoration:none}
+a:hover{color:var(--primary-soft)}
+::selection{background:rgba(0,217,146,.24);color:#fff}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:2px}
+.mono{font-family:var(--mono)}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px}
+.band{padding:56px 0;border-top:1px dashed rgba(79,93,117,.4)}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--primary-soft);margin-bottom:14px}
+.lead{color:var(--body);font-size:18px;line-height:1.6;max-width:70ch}
+.muted{color:var(--mute)}
+.small{font-size:14px;line-height:1.5}
+
+/* top nav */
+.nav{position:sticky;top:0;z-index:50;background:rgba(16,16,16,.86);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--hairline)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:56px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--ink-strong);font-size:15px}
+.brand .glyph{width:18px;height:18px;color:var(--primary)}
+.nav .tag{font-size:12px;color:var(--mute);border:1px solid var(--hairline);border-radius:var(--r-pill);padding:3px 10px}
+
+/* cards / chrome */
+.card{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-md);padding:24px}
+.card.soft{background:var(--canvas-soft)}
+.card.emph{border-width:2px;border-color:var(--hairline)}
+.card.green{border-color:rgba(0,217,146,.5)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:900px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+/* chips / pills / badges */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;border:1px solid var(--hairline);
+  border-radius:var(--r-pill);padding:3px 10px;color:var(--ink);background:var(--canvas);white-space:nowrap}
+.pill.green{border-color:rgba(0,217,146,.45);color:var(--primary-soft)}
+.pill.watch{border-color:rgba(255,184,77,.5);color:var(--watch)}
+.pill.crit{border-color:rgba(255,93,93,.5);color:var(--crit)}
+.pill.info{border-color:rgba(78,168,255,.5);color:var(--info)}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--primary)}
+.badge-verified{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--primary-soft);
+  border:1px solid rgba(0,217,146,.4);border-radius:var(--r-pill);padding:2px 9px}
+.tag-type{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:600}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font);font-weight:600;font-size:14px;
+  border-radius:var(--r-sm);padding:9px 15px;border:1px solid transparent;cursor:pointer;transition:transform .12s,background .12s,border-color .12s}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--primary);color:var(--on-primary)}
+.btn-outline{background:var(--canvas);color:var(--ink);border-color:var(--hairline)}
+.btn-ghost{background:transparent;color:var(--primary-soft);padding:9px 6px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.btn:hover{transform:none}}
+
+/* provenance line */
+.prov{font-family:var(--mono);font-size:11px;color:var(--mute);display:flex;align-items:center;gap:6px;margin-top:10px}
+.prov::before{content:"";width:11px;height:11px;flex:0 0 auto;
+  background:linear-gradient(135deg,var(--primary),transparent);border-radius:2px;opacity:.7}
+
+/* KPI stat */
+.kpi{display:flex;flex-direction:column;gap:3px}
+.kpi .v{font-size:26px;font-weight:600;color:var(--ink-strong);line-height:1;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.delta-up{color:var(--up);font-size:12px} .delta-down{color:var(--down);font-size:12px}
+
+/* data table */
+table.data{width:100%;border-collapse:collapse;font-size:13.5px}
+table.data th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);text-align:left;
+  font-weight:600;padding:8px 12px;border-bottom:1px solid var(--hairline);background:var(--canvas-soft)}
+table.data td{padding:9px 12px;border-bottom:1px solid var(--hairline-2);color:var(--body);font-variant-numeric:tabular-nums}
+table.data tr:hover td{color:var(--ink)}
+.tablewrap{overflow-x:auto}
+
+/* annotation callout (the "designer's note" on a pattern) */
+.note{display:flex;gap:12px;border-left:2px solid var(--primary);background:var(--canvas-soft);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;padding:12px 16px;font-size:13.5px;color:var(--body)}
+.note b{color:var(--ink)}
+.note .k{font-family:var(--mono);font-size:11px;color:var(--primary-soft);letter-spacing:.05em;text-transform:uppercase;flex:0 0 auto}
+
+/* chat bubble / MCP-app frame */
+.chat{background:var(--canvas-soft);border:1px solid var(--hairline);border-radius:var(--r-md);padding:14px}
+.chat .msg{font-size:14px;color:var(--body);margin-bottom:10px}
+.mcp{border:1px solid var(--hairline);border-radius:var(--r-sm);background:var(--canvas);padding:12px}
+.mcp .mcp-actions{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--hairline-2)}
+
+/* mini legend */
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--mute);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:9px;height:9px;border-radius:2px;display:inline-block}
+svg{display:block;max-width:100%}
+
+/* ---- page-local helpers (built on the kit tokens only) ---- */
+.hero-band{padding:72px 0 48px}
+.pillrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.section-head{max-width:76ch;margin-bottom:28px}
+.vocab{display:flex;flex-direction:column;gap:8px}
+.vocab .term{font-size:15px;font-weight:600;color:var(--ink-strong);display:flex;align-items:center;gap:8px}
+.arrow-note{color:var(--mute);font-size:13px}
+.wasnow td.was{color:var(--mute)}
+.wasnow td.now{color:var(--ink)}
+.wasnow td.now b{color:var(--primary-soft);font-weight:600}
+.strike{text-decoration:line-through;text-decoration-color:var(--down);text-decoration-thickness:1px}
+
+/* object-model flow diagram */
+.omflow{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding-bottom:4px}
+.omnode{flex:1 1 0;min-width:150px;background:var(--canvas-2);border:1px solid var(--hairline);border-radius:var(--r-md);
+  padding:16px;display:flex;flex-direction:column;gap:6px}
+.omnode.split{background:transparent;border:none;padding:0;gap:10px}
+.omnode.split .sub{background:var(--canvas-2);border:1px solid var(--hairline);border-radius:var(--r-md);padding:12px 14px}
+.omnode .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.omnode .t{font-size:17px;font-weight:600;color:var(--ink-strong);display:flex;align-items:center;gap:8px}
+.omnode .d{font-size:12.5px;color:var(--body);line-height:1.5}
+.omarrow{flex:0 0 34px;display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:20px}
+@media(max-width:820px){.omflow{flex-direction:column}.omarrow{width:100%;transform:rotate(90deg);height:26px;flex-basis:26px}}
+
+/* left-nav mock */
+.appmock{display:grid;grid-template-columns:248px 1fr;border:1px solid var(--hairline);border-radius:var(--r-md);overflow:hidden;background:var(--canvas-2)}
+@media(max-width:820px){.appmock{grid-template-columns:1fr}}
+.appnav{background:var(--canvas-soft);border-right:1px solid var(--hairline);padding:16px 12px;display:flex;flex-direction:column;gap:4px}
+@media(max-width:820px){.appnav{border-right:none;border-bottom:1px solid var(--hairline)}}
+.appnav .logo{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--ink-strong);font-size:14px;padding:6px 10px 14px}
+.appnav .logo svg{width:16px;height:16px;color:var(--primary)}
+.navitem{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:var(--r-sm);font-size:14px;color:var(--body)}
+.navitem .ic{width:16px;height:16px;flex:0 0 auto;color:var(--mute)}
+.navitem.active{background:rgba(0,217,146,.1);color:var(--ink-strong);border:1px solid rgba(0,217,146,.35)}
+.navitem.active .ic{color:var(--primary)}
+.navitem .land{margin-left:auto;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--primary-soft);
+  border:1px solid rgba(0,217,146,.4);border-radius:var(--r-pill);padding:1px 7px;font-weight:600}
+.appbody{padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+.annot{display:flex;gap:10px;font-size:13px;color:var(--body);padding:8px 0;border-bottom:1px solid var(--hairline-2)}
+.annot:last-child{border-bottom:none}
+.annot .nm{flex:0 0 108px;color:var(--ink);font-weight:600}
+
+/* two chat surfaces layout mock */
+.surfacemock{border:1px solid var(--hairline-2);border-radius:var(--r-sm);background:var(--canvas-2);padding:12px;display:flex;gap:8px;height:118px}
+.surfacemock .region{border:1px dashed var(--hairline);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;
+  font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);text-align:center;font-weight:600}
+.surfacemock .canvas{flex:1;background:rgba(255,255,255,.015)}
+.surfacemock .dock{flex:0 0 92px;background:rgba(0,217,146,.07);border-color:rgba(0,217,146,.4);color:var(--primary-soft)}
+.surfacemock .full{flex:1;background:rgba(0,217,146,.07);border-color:rgba(0,217,146,.4);color:var(--primary-soft)}
+
+/* lens cards */
+.lens .role{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.lens h4{margin-top:2px}
+.lens ul{margin:12px 0 0;padding-left:18px;color:var(--body);font-size:13px;line-height:1.6}
+.lens ul li{margin-bottom:3px}
+
+/* deliverable action rows */
+.actrow{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--hairline-2)}
+.actrow:last-child{border-bottom:none}
+.actrow .ib{flex:0 0 34px;height:34px;border-radius:var(--r-sm);background:rgba(0,217,146,.1);border:1px solid rgba(0,217,146,.3);
+  display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:16px}
+.actrow .nm{font-weight:600;color:var(--ink);font-size:14px}
+.actrow .ds{font-size:13px;color:var(--body)}
+.actrow .hang{font-size:11px;color:var(--mute);font-family:var(--mono);margin-top:3px}
+
+/* positioning quote */
+.quote{font-size:clamp(22px,3vw,30px);line-height:1.28;color:var(--ink-strong);font-weight:400;letter-spacing:-.02em;max-width:22ch}
+.quote em{color:var(--primary-soft);font-style:normal}
+
+.footer{padding:40px 0;border-top:1px solid var(--hairline);color:var(--mute);font-size:13px}
+.footer .wrap{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between}
+</style>
+
+<!-- 1 ================= STICKY NAV ================= -->
+<nav class="nav">
+  <div class="wrap">
+    <div class="brand">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" fill="currentColor"/>
+      </svg>
+      Bricklayer
+    </div>
+    <span class="tag">Discovery · Brandcave · Jul 2026</span>
+  </div>
+</nav>
+
+<!-- 2 ================= HERO BAND ================= -->
+<header class="wrap hero-band">
+  <div class="eyebrow">Product Model &amp; IA</div>
+  <h1>The HubSpot-anchored model</h1>
+  <p class="lead" style="margin-top:22px">
+    Stop inventing an IA. <b style="color:var(--ink)">Adopt HubSpot's object model</b> — Dashboards
+    (collections of Reports) plus a Reports library — and layer our real differentiator on top: a genuinely
+    good analytics copilot. HubSpot gives us the familiar, boring, correct BI chassis Ed already has in his
+    head; its own AI ("Breeze") is weak and single-object-bound — precisely the gap we win on.
+  </p>
+  <p class="small muted" style="margin-top:20px;max-width:72ch">
+    <b class="mono" style="color:var(--primary-soft)">How to read this</b> &nbsp;— This is the
+    <i>July&nbsp;15 course-correction rebase</i>. The July&nbsp;14 discovery built a bespoke IA
+    (<span class="mono">Briefing / Boards / Properties / Deliverables</span>); on the call Cody redirected us
+    onto HubSpot's Reporting skeleton, because that is where the client is drawing his mental model. This
+    document is honest about what changed. Voltagent-DS-styled discovery documentation — not the shipping app.
+    Real POC numbers throughout ($6.5B book · 3,935 appraisals).
+  </p>
+  <div class="pillrow" style="margin-top:22px">
+    <span class="pill green"><span class="dot"></span> HubSpot object model</span>
+    <span class="pill">2 chat surfaces</span>
+    <span class="pill">5 destinations</span>
+    <span class="pill">RBAC lenses</span>
+    <span class="pill info">Direction: v2 (HubSpot-anchored)</span>
+  </div>
+</header>
+
+<!-- 3 ================= WHAT CHANGED ================= -->
+<section class="band"><div class="wrap">
+  <div class="eyebrow">The course correction · July 15</div>
+  <h2>What changed</h2>
+  <p class="lead" style="margin-top:14px">Four honest moves. We retired a bespoke skeleton we were fond of and
+    adopted HubSpot's nouns verbatim — the naming confused the model against the very frame Ed uses. The audit
+    against Ed's 25 POC screenshots confirmed the rebase does not lose him.</p>
+  <div class="tablewrap" style="margin-top:26px">
+    <table class="data wasnow">
+      <thead><tr><th style="width:34%">Was — July 14 bespoke IA</th><th style="width:6%"></th><th>Now — Direction v2 (HubSpot-anchored)</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="was"><span class="strike">"Boards"</span> — a bespoke word for a saved canvas</td>
+          <td style="color:var(--primary)">→</td>
+          <td class="now"><b>Dashboards</b> + <b>Reports</b> — HubSpot nouns, verbatim. A dashboard is a collection; a report is one chart.</td>
+        </tr>
+        <tr>
+          <td class="was">Four bespoke destinations — <span class="mono">Briefing / Boards / Properties / Deliverables</span></td>
+          <td style="color:var(--primary)">→</td>
+          <td class="now">HubSpot's <b>object model</b> — Dashboards · Reports · Properties · Insights · Chat. Deliverables demoted to actions.</td>
+        </tr>
+        <tr>
+          <td class="was">One chat — a single undifferentiated assistant</td>
+          <td style="color:var(--primary)">→</td>
+          <td class="now"><b>Two surfaces, one agent</b> — right-docked co-working + a full-page threaded chat destination.</td>
+        </tr>
+        <tr>
+          <td class="was">~12 bespoke "primitives" the agent draws from</td>
+          <td style="color:var(--primary)">→</td>
+          <td class="now"><b>14 widget types × two forms</b> — every type ships as a dashboard tile <i>and</i> an in-chat MCP app.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note" style="margin-top:22px">
+    <span class="k">Honest</span>
+    <div>"Board" was load-bearing in Ed's own POC — retiring it is a conscious, accepted cost. We keep the
+      <b>idea</b> (draft / saved / ephemeral / present-mode lifecycle) and re-hang it on Dashboards. Only the word dies.</div>
+  </div>
+</div></section>
+
+<!-- 4 ================= THE OBJECT MODEL ================= -->
+<section class="band"><div class="wrap">
+  <div class="eyebrow">The object model · locked vocabulary</div>
+  <h2>Widget → Report → Dashboard → Tile / MCP app</h2>
+  <p class="lead section-head" style="margin-top:14px">One sentence: a <b style="color:var(--ink)">widget</b> (type)
+    is configured with data into a <b style="color:var(--ink)">report</b> (object), which appears as a
+    <b style="color:var(--ink)">tile</b> on a <b style="color:var(--ink)">dashboard</b> — or as an
+    <b style="color:var(--ink)">MCP app</b> in chat. Four nouns, adopted to end the term-collision between Ed's,
+    Cody's, and HubSpot's usage.</p>
+
+  <div class="omflow">
+    <div class="omnode">
+      <span class="k">The type</span>
+      <span class="t"><span class="dot"></span>Widget</span>
+      <span class="d">The <i>kind</i> of visualization — bar, line, scatter, map, heatmap, KPI, table… A reusable DS primitive. ~14 of them. This is what we <b style="color:var(--body)">build</b>.</span>
+    </div>
+    <div class="omarrow" aria-hidden="true">→</div>
+    <div class="omnode">
+      <span class="k">The object</span>
+      <span class="t"><span class="dot" style="background:var(--c2)"></span>Report</span>
+      <span class="d">A saved, data-bound <i>instance</i> — "Avg cap rate by vintage." HubSpot's core noun: listable, permissioned, reusable.</span>
+    </div>
+    <div class="omarrow" aria-hidden="true">→</div>
+    <div class="omnode">
+      <span class="k">The collection</span>
+      <span class="t"><span class="dot" style="background:var(--c3)"></span>Dashboard</span>
+      <span class="d">A saved collection of reports on a grid canvas — one purpose or role. (Ed's "board.")</span>
+    </div>
+    <div class="omarrow" aria-hidden="true">→</div>
+    <div class="omnode split">
+      <div class="sub">
+        <span class="k" style="margin-bottom:4px;display:block">Render A</span>
+        <span class="t" style="font-size:15px"><span class="dot" style="background:var(--c4)"></span>Tile</span>
+        <span class="d">The report rendered <i>on a dashboard</i>.</span>
+      </div>
+      <div class="sub">
+        <span class="k" style="margin-bottom:4px;display:block">Render B</span>
+        <span class="t" style="font-size:15px"><span class="dot" style="background:var(--c4)"></span>MCP app</span>
+        <span class="d">The <i>same</i> report rendered <i>in chat</i>, with Save / Edit.</span>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:38px">Object rules — borrowed from HubSpot so we don't re-litigate them</h3>
+  <div class="grid g3" style="margin-top:16px">
+    <div class="card soft">
+      <h4>Reports live standalone</h4>
+      <p class="small muted" style="margin-top:8px">A report can be saved with <b style="color:var(--body)">no dashboard</b> and sit in the library. One report attaches to <b style="color:var(--body)">many</b> dashboards — it is not owned by any one of them.</p>
+    </div>
+    <div class="card soft">
+      <h4>Access is inherited</h4>
+      <p class="small muted" style="margin-top:8px">Once a report is placed on a dashboard it <b style="color:var(--body)">inherits that dashboard's access</b>. Worth mirroring given our RBAC lenses — permissioning flows through placement.</p>
+    </div>
+    <div class="card soft">
+      <h4>A default dashboard per lens</h4>
+      <p class="small muted" style="margin-top:8px">Each lens gets a <b style="color:var(--body)">star-set default</b>, changeable via a top-left switcher (All / Favorites / Mine + search) — the HubSpot pattern.</p>
+    </div>
+  </div>
+
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card soft">
+      <div class="tag-type">Dashboards · list view</div>
+      <h4 style="margin-top:6px">Manage every dashboard in one place</h4>
+      <p class="small muted" style="margin-top:8px">A list / manage view of all dashboards — filterable, with the switcher on the canvas. Deleted dashboards are restorable ~14 days.</p>
+    </div>
+    <div class="card green soft">
+      <div class="tag-type" style="color:var(--primary-soft)">Reports · library</div>
+      <h4 style="margin-top:6px">User- <span class="muted">and</span> AI-made, in one library</h4>
+      <p class="small muted" style="margin-top:8px">Every report — filterable by owner · last-updated · dashboard · tags, with saved views. Crucially, the agent's reports land here too: <b style="color:var(--body)">the agent is just another author.</b></p>
+    </div>
+  </div>
+  <div class="note" style="margin-top:18px">
+    <span class="k">Why it matters</span>
+    <div>Because the agent writes into the <b>same</b> library as a human, an AI-built report is a first-class,
+      permissioned, reusable object — not a throwaway chat reply. That is what makes "save this to a dashboard" real.</div>
+  </div>
+</div></section>
+
+<!-- 5 ================= THE IA / LEFT-NAV ================= -->
+<section class="band"><div class="wrap">
+  <div class="eyebrow">The IA · destinations</div>
+  <h2>The left-nav — five destinations</h2>
+  <p class="lead section-head" style="margin-top:14px">Rendered as the app's left rail. It mirrors HubSpot's Reporting
+    split (Dashboards / Reports) and adds the two things HubSpot has no home for: our per-lens <b style="color:var(--ink)">Insights</b>
+    landing and a first-class <b style="color:var(--ink)">Chat</b> destination.</p>
+
+  <div class="appmock">
+    <aside class="appnav" aria-label="App navigation mock">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" fill="currentColor"/></svg>
+        Bricklayer
+      </div>
+      <div class="navitem active">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+        Insights <span class="land">Landing</span>
+      </div>
+      <div class="navitem">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        Dashboards
+      </div>
+      <div class="navitem">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+        Reports
+      </div>
+      <div class="navitem">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/></svg>
+        Properties
+      </div>
+      <div class="navitem">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M21 15a2 2 0 01-2 2H8l-4 4V5a2 2 0 012-2h13a2 2 0 012 2z"/></svg>
+        Chat
+      </div>
+    </aside>
+    <div class="appbody">
+      <div class="annot"><span class="nm">Insights</span><span>The per-lens landing. On login you land here, <b style="color:var(--ink)">for your lens</b> — a workspace of the AI "TODAY" read, finding-cards, surprising-links, and a focus panel with BRICKLAYER'S READ. The opinion layer, not a dashboard copy.</span></div>
+      <div class="annot"><span class="nm">Dashboards</span><span>Saved collections of reports on a grid canvas. Switcher + list view; drag / resize / autosave. Where you browse.</span></div>
+      <div class="annot"><span class="nm">Reports</span><span>The library — every report, user- and AI-made. Filter, sort, saved views. Reports attach to many dashboards.</span></div>
+      <div class="annot"><span class="nm">Properties</span><span>The individual-asset altitude — portfolio → property drill-down, with the per-property workspace and provenance.</span></div>
+      <div class="annot"><span class="nm">Chat</span><span>The full-page threaded destination. Ask book-wide questions; the agent returns MCP apps you can save into dashboards.</span></div>
+    </div>
+  </div>
+  <div class="note" style="margin-top:18px">
+    <span class="k">Note</span>
+    <div><b>Insights is the landing.</b> It is per-lens and first-class — the role-based home page, not a side-tab.
+      The Lender's Insights and the Portfolio Manager's Insights are genuinely different reads. Dashboards / Reports
+      supply the familiar HubSpot chassis beneath it.</div>
+  </div>
+</div></section>
+
+<!-- 6 ================= THE TWO CHAT SURFACES ================= -->
+<section class="band"><div class="wrap">
+  <div class="eyebrow">Two surfaces · one agent</div>
+  <h2>The two chat surfaces</h2>
+  <p class="lead section-head" style="margin-top:14px">Chat is not one thing — <b style="color:var(--ink)">placement
+    encodes the AI's role</b>. A summonable co-working assistant docked to the page you're on, and a full-page
+    threaded chat with its own destination. Same agent, two jobs.</p>
+
+  <div class="grid g2" style="margin-top:8px">
+    <div class="card">
+      <div class="title-row" style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+        <h3>Right-docked co-working</h3>
+        <span class="pill">Secondary</span>
+      </div>
+      <div class="surfacemock" style="margin-top:16px" aria-label="Right-docked layout">
+        <div class="region canvas">Page / dashboard</div>
+        <div class="region dock">Chat ▸</div>
+      </div>
+      <ul class="lens ul" style="margin:16px 0 0;padding-left:18px;color:var(--body);font-size:13.5px;line-height:1.65">
+        <li><b style="color:var(--ink)">Summonable</b> — ⌘K or a button; collapsible.</li>
+        <li>Page- &amp; context-aware — chat with the data on screen.</li>
+        <li>Takes <b style="color:var(--ink)">write actions</b> — create report, add to dashboard, new dashboard.</li>
+        <li>Can be <b style="color:var(--ink)">promoted to full-page.</b></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="title-row" style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+        <h3>Full-page threaded chat</h3>
+        <span class="pill green">Primary NL destination</span>
+      </div>
+      <div class="surfacemock" style="margin-top:16px" aria-label="Full-page layout">
+        <div class="region full">Threaded chat · MCP apps</div>
+      </div>
+      <ul class="lens ul" style="margin:16px 0 0;padding-left:18px;color:var(--body);font-size:13.5px;line-height:1.65">
+        <li>Its <b style="color:var(--ink)">own page</b>, threaded — ask across the whole book.</li>
+        <li>Agent returns <b style="color:var(--ink)">MCP apps</b>, incl. charts built on the fly.</li>
+        <li>Save / pin any app into a dashboard.</li>
+        <li>Null state shows <b style="color:var(--ink)">suggested prompts.</b></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:20px">
+    <span class="k">Placement rule</span>
+    <div>Chat docks <b>left only when it is the driver</b> of the app (Lovable / v0 / Cursor — "describe the outcome,
+      AI builds everything"). Bricklayer's chat is an <b>assistant over existing dashboards</b>, so we
+      <b>dock it right</b>. Left = collaborative co-creation; right = task interpretation within an existing
+      workflow. Ed's left-dock idea is deliberately set aside.</div>
+  </div>
+</div></section>
+
+<!-- 7 ================= RBAC LENSES ================= -->
+<section class="band"><div class="wrap">
+  <div class="eyebrow">RBAC · set at provisioning</div>
+  <h2>Three lenses, no switcher</h2>
+  <p class="lead section-head" style="margin-top:14px">A user's <b style="color:var(--ink)">lens</b> is set once, at
+    provisioning. It shapes the data viewpoint — what's surfaced, the default dashboard, how Insights reads. There is
+    <b style="color:var(--ink)">no in-app lens switcher</b>: you are your role.</p>
+
+  <div class="grid g3" style="margin-top:8px">
+    <div class="card lens">
+      <span class="role">Lens 01</span>
+      <h4>Portfolio Manager</h4>
+      <p class="small muted" style="margin-top:8px">Book-wide concentration and exposure. Sees the whole $6.5B across 3,935 appraisals.</p>
+      <ul>
+        <li>Residential 25% concentration ($1.55B)</li>
+        <li>Value-vs-cap by class</li>
+        <li>Geographic / flood-zone exposure</li>
+      </ul>
+    </div>
+    <div class="card lens">
+      <span class="role">Lens 02</span>
+      <h4>Credit-Lending Officer</h4>
+      <p class="small muted" style="margin-top:8px">Deal- and risk-level scrutiny. Reprice stress and the scored watchlist.</p>
+      <ul>
+        <li>Direct-cap reprice stress tile</li>
+        <li>Risk watchlist scored 0–100 + WHY</li>
+        <li>1,233 appraisals aged &gt;24mo</li>
+      </ul>
+    </div>
+    <div class="card lens">
+      <span class="role">Lens 03</span>
+      <h4>Chief Appraiser</h4>
+      <p class="small muted" style="margin-top:8px">Valuation quality and workload. Extraction QA and appraiser throughput.</p>
+      <ul>
+        <li>Condition → price/SF integrity</li>
+        <li>Appraiser workload (the 300% flag)</li>
+        <li>Valuation approach mix / data health</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note" style="margin-top:20px">
+    <span class="k">Confirmed</span>
+    <div>The lens is unaffected by the rebase (Decision D3, kept). It pairs with access inheritance: a report placed
+      on a lens's dashboard inherits that dashboard's access — the lens shapes the viewpoint, RBAC enforces it.</div>
+  </div>
+</div></section>
+
+<!-- 8 ================= DELIVERABLES AS ACTIONS ================= -->
+<section class="band"><div class="wrap">
+  <div class="eyebrow">Deliverables · rescoped</div>
+  <h2>Deliverables are actions, not a tab</h2>
+  <p class="lead section-head" style="margin-top:14px">Ed called export the "average → great" gap. In a
+    Dashboards + Reports world it is <b style="color:var(--ink)">not a destination</b> — it's a set of actions hung
+    off dashboards and reports. First-class as a <i>capability</i>, not as a <i>tab</i>.</p>
+
+  <div class="card soft" style="margin-top:8px">
+    <div class="actrow">
+      <div class="ib">↧</div>
+      <div>
+        <div class="nm">Export credit-ready packet</div>
+        <div class="ds">"Export this dashboard as a credit-ready packet" — the framing that goes past HubSpot's raw data export.</div>
+        <div class="hang">hangs off · a dashboard</div>
+      </div>
+    </div>
+    <div class="actrow">
+      <div class="ib">✎</div>
+      <div>
+        <div class="nm">Create credit note</div>
+        <div class="ds">"Create the credit note for this property" — a per-asset deliverable generated from the report set.</div>
+        <div class="hang">hangs off · a report / property</div>
+      </div>
+    </div>
+    <div class="actrow">
+      <div class="ib">◱</div>
+      <div>
+        <div class="nm">Present mode</div>
+        <div class="ds">A clean, projected view of a dashboard for a meeting. The kept half of the retired "board lifecycle."</div>
+        <div class="hang">hangs off · a dashboard</div>
+      </div>
+    </div>
+    <div class="actrow">
+      <div class="ib">⟲</div>
+      <div>
+        <div class="nm">Ephemeral dashboards</div>
+        <div class="ds">A dashboard built for one meeting that expires — the agent can assemble one on the fly, then let it lapse.</div>
+        <div class="hang">hangs off · Dashboards (lifecycle)</div>
+      </div>
+    </div>
+  </div>
+  <div class="note" style="margin-top:18px">
+    <span class="k">Kept idea</span>
+    <div>The board <b>lifecycle</b> Ed liked — draft / saved / ephemeral / present — survives the rename. It just
+      re-hangs on Dashboards as actions and states, rather than being its own top-level "Deliverables" tab.</div>
+  </div>
+</div></section>
+
+<!-- 9 ================= POSITIONING ================= -->
+<section class="band"><div class="wrap">
+  <div class="eyebrow">Positioning · the wedge</div>
+  <div class="grid g2" style="align-items:center;gap:32px">
+    <div>
+      <p class="quote">CoStar is a database with reports; <em>Bricklayer is an analyst with receipts.</em></p>
+      <p class="small muted" style="margin-top:20px;max-width:52ch">Every number is traceable to the appraisal page.
+        The familiar HubSpot chassis makes us instantly legible; the depth and provenance are what neither CoStar
+        nor HubSpot has. That's the "receipts."</p>
+    </div>
+    <div class="card green">
+      <div class="tag-type" style="color:var(--primary-soft)">The opening vs HubSpot Breeze</div>
+      <h4 style="margin-top:8px">A weak, single-object AI is the gap</h4>
+      <p class="small" style="margin-top:12px;color:var(--body)">HubSpot's Breeze is a <b style="color:var(--ink)">prompt-to-single-report
+        generator</b> — single-object only, HubSpot-data-bound, thin iteration. Cody called it "really unimpressive."
+        Our wedge:</p>
+      <ul style="margin:14px 0 0;padding-left:18px;color:var(--body);font-size:13.5px;line-height:1.65">
+        <li><b style="color:var(--ink)">Cross-object, book-wide reasoning</b> over the whole appraisal data lake — not one-object reports.</li>
+        <li><b style="color:var(--ink)">A real copilot</b>, not a report wizard — co-working + full-page, with write actions and save-to-dashboard first-class.</li>
+        <li><b style="color:var(--ink)">Provenance / receipts</b> — every number traceable to the appraisal page.</li>
+      </ul>
+      <div class="prov">Source: Data Lake · appraisals ($6.5B · 3,935)</div>
+    </div>
+  </div>
+</div></section>
+
+<!-- 10 ================= FOOTER ================= -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="brand">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" fill="currentColor"/></svg>
+      Bricklayer
+    </div>
+    <span>Brandcave · Bricklayer discovery · July 2026</span>
+    <span class="muted">Direction: <span class="mono">DIRECTION-v2-hubspot-anchored.md</span></span>
+  </div>
+</footer>

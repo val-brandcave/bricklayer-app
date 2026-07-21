@@ -1,0 +1,159 @@
+/* ============================================================
+   Bricklayer — dashboard grid skin (react-grid-layout, tokenized)
+   RGL provides the invisible engine (collision, compaction, snap);
+   every visible surface here is re-skinned to our design tokens.
+   All rules are scoped under .bl-grid for specificity over RGL's
+   own stylesheet, so import order never matters.
+   ============================================================ */
+
+.bl-grid {
+  position: relative;
+}
+
+/* Position moves animate via transform (smooth reflow of pushed tiles);
+   size changes snap so we don't thrash chart re-renders mid-transition. */
+.bl-grid .react-grid-item {
+  transition: transform 220ms var(--ease);
+  border-radius: var(--r-lg);
+}
+
+.bl-grid .react-grid-item.react-draggable-dragging,
+.bl-grid .react-grid-item.resizing {
+  transition: none;
+  z-index: 5;
+}
+
+/* The card inside a tile fills the grid cell (not the absolutely-positioned
+   grip — scope to the card so the grip keeps its own 26px box). */
+.bl-grid .bl-tile > .bl-tile-card {
+  height: 100%;
+}
+/* Reserve a left gutter in the tile header so the drag grip never covers the
+   title (constant indent — no shift when the grip reveals on hover). */
+.bl-grid .bl-tile-card > header {
+  padding-left: 44px !important;
+}
+
+/* Hover / active highlight — the HubSpot-style focus ring + lift. The ring
+   lives on the item wrapper (not the card) so it wins over the card's inline
+   box-shadow; the 1.5px ring paints just outside the card's rounded edge. */
+.bl-grid .react-grid-item.bl-tile {
+  transition: box-shadow 160ms var(--ease);
+}
+.bl-grid .react-grid-item.bl-tile:hover {
+  z-index: 4;
+  box-shadow: 0 0 0 1.5px var(--primary), var(--shadow-md);
+}
+.bl-grid .react-grid-item.react-draggable-dragging,
+.bl-grid .react-grid-item.resizing {
+  box-shadow: 0 0 0 1.5px var(--primary), var(--shadow-lg);
+}
+
+/* Drop-target placeholder — RGL's red default → our brand-soft dashed cell. */
+.bl-grid .react-grid-item.react-grid-placeholder {
+  background: var(--primary-soft);
+  border: 1.5px dashed var(--primary);
+  border-radius: var(--r-lg);
+  opacity: 0.9;
+  transition: transform 120ms var(--ease), opacity 120ms var(--ease);
+}
+
+/* Drag grip — top-left, revealed on hover (and while dragging). */
+.bl-tile-grip {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-sm);
+  color: var(--faint);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  cursor: grab;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease), color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.bl-grid .react-grid-item.bl-tile:hover .bl-tile-grip {
+  opacity: 1;
+}
+.bl-tile-grip:hover {
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+.bl-tile-grip:active {
+  cursor: grabbing;
+}
+.bl-grid .react-grid-item.react-draggable-dragging .bl-tile-grip {
+  opacity: 1;
+  cursor: grabbing;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+/* keyboard focus visibility */
+.bl-tile-grip:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Resize grip — bottom-right, revealed on hover. We reuse RGL's positioned
+   .react-resizable-handle (bottom/right + hover opacity) and restyle the
+   corner marks to our tokens with a diagonal-dot glyph. */
+.bl-grid .react-grid-item > .react-resizable-handle {
+  width: 22px;
+  height: 22px;
+  bottom: 0;
+  right: 0;
+}
+.bl-grid .react-grid-item > .react-resizable-handle::after {
+  content: "";
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  width: 8px;
+  height: 8px;
+  border: none;
+  /* three diagonal dots, brand-tinted */
+  background-image: radial-gradient(circle, var(--muted) 40%, transparent 42%);
+  background-size: 3px 3px;
+  background-position: bottom right;
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  transition: background-image var(--dur) var(--ease);
+}
+.bl-grid .react-grid-item.bl-tile:hover > .react-resizable-handle::after {
+  background-image: radial-gradient(circle, var(--primary) 42%, transparent 44%);
+}
+
+/* Region holds the overlay + grid; the overlay aligns to THIS box's top:0,
+   which is the grid's top:0 (the SaveIndicator lives outside it). */
+.bl-grid-region {
+  position: relative;
+}
+
+/* Faint grid-cell overlay shown only while dragging/resizing. Top-anchored
+   (not inset:0) so its fixed-height rows line up exactly with the grid rows
+   instead of being stretched to the region height. */
+.bl-grid-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.bl-grid-overlay-cell {
+  border: 1px dashed var(--hairline);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--primary-soft) 45%, transparent);
+}
+
+/* GridLayout sits above the overlay. */
+.bl-grid .react-grid-layout {
+  position: relative;
+  z-index: 1;
+}

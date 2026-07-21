@@ -1,0 +1,704 @@
+<title>Bricklayer — User-Flow Wireframes</title>
+<style>
+:root{
+  /* Voltagent surface + brand */
+  --canvas:#101010; --canvas-soft:#1a1a1a; --canvas-2:#141414;
+  --hairline:#3d3a39; --hairline-2:#2a2827;
+  --primary:#00d992; --primary-soft:#2fd6a1; --primary-deep:#10b981; --on-primary:#101010;
+  --ink-strong:#ffffff; --ink:#f2f2f2; --body:#bdbdbd; --mute:#8b949e;
+  /* semantic (separate from brand green) */
+  --up:#3fd07f; --down:#ff6b6b; --watch:#ffb84d; --crit:#ff5d5d; --info:#4ea8ff;
+  /* categorical data-viz palette (reads on #101010) */
+  --c1:#00d992; --c2:#4ea8ff; --c3:#b98cff; --c4:#ffb84d; --c5:#ff7a8a; --c6:#38d6c4; --c7:#d4d867; --c8:#8b9bb4;
+  --grid:#2a2827;
+  --font:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"SFMono-Regular",Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+  --r-sm:6px; --r-md:8px; --r-pill:9999px;
+  --maxw:1200px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--canvas);color:var(--ink);
+  font-family:var(--font);font-size:16px;line-height:1.65;
+  font-feature-settings:"calt","rlig";-webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4{margin:0;font-weight:400;letter-spacing:-.02em;color:var(--ink-strong);text-wrap:balance}
+h1{font-size:clamp(34px,5vw,60px);line-height:1.02;letter-spacing:-.025em}
+h2{font-size:clamp(26px,3.2vw,36px);line-height:1.1;letter-spacing:-.025em}
+h3{font-size:22px;font-weight:600;line-height:1.25}
+h4{font-size:16px;font-weight:600;color:var(--ink)}
+p{margin:0}
+a{color:var(--primary-deep);text-decoration:none}
+a:hover{color:var(--primary-soft)}
+::selection{background:rgba(0,217,146,.24);color:#fff}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:2px}
+.mono{font-family:var(--mono)}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px}
+.band{padding:56px 0;border-top:1px dashed rgba(79,93,117,.4)}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--primary-soft);margin-bottom:14px}
+.lead{color:var(--body);font-size:18px;line-height:1.6;max-width:70ch}
+.muted{color:var(--mute)}
+.small{font-size:14px;line-height:1.5}
+
+/* top nav */
+.nav{position:sticky;top:0;z-index:50;background:rgba(16,16,16,.86);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--hairline)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:56px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--ink-strong);font-size:15px}
+.brand .glyph{width:18px;height:18px;color:var(--primary)}
+.nav .tag{font-size:12px;color:var(--mute);border:1px solid var(--hairline);border-radius:var(--r-pill);padding:3px 10px}
+
+/* cards / chrome */
+.card{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-md);padding:24px}
+.card.soft{background:var(--canvas-soft)}
+.card.emph{border-width:2px;border-color:var(--hairline)}
+.card.green{border-color:rgba(0,217,146,.5)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:900px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+/* chips / pills / badges */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;border:1px solid var(--hairline);
+  border-radius:var(--r-pill);padding:3px 10px;color:var(--ink);background:var(--canvas);white-space:nowrap}
+.pill.green{border-color:rgba(0,217,146,.45);color:var(--primary-soft)}
+.pill.watch{border-color:rgba(255,184,77,.5);color:var(--watch)}
+.pill.crit{border-color:rgba(255,93,93,.5);color:var(--crit)}
+.pill.info{border-color:rgba(78,168,255,.5);color:var(--info)}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--primary)}
+.badge-verified{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--primary-soft);
+  border:1px solid rgba(0,217,146,.4);border-radius:var(--r-pill);padding:2px 9px}
+.tag-type{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:600}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font);font-weight:600;font-size:14px;
+  border-radius:var(--r-sm);padding:9px 15px;border:1px solid transparent;cursor:pointer;transition:transform .12s,background .12s,border-color .12s}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--primary);color:var(--on-primary)}
+.btn-outline{background:var(--canvas);color:var(--ink);border-color:var(--hairline)}
+.btn-ghost{background:transparent;color:var(--primary-soft);padding:9px 6px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.btn:hover{transform:none}}
+
+/* provenance line */
+.prov{font-family:var(--mono);font-size:11px;color:var(--mute);display:flex;align-items:center;gap:6px;margin-top:10px}
+.prov::before{content:"";width:11px;height:11px;flex:0 0 auto;
+  background:linear-gradient(135deg,var(--primary),transparent);border-radius:2px;opacity:.7}
+
+/* KPI stat */
+.kpi{display:flex;flex-direction:column;gap:3px}
+.kpi .v{font-size:26px;font-weight:600;color:var(--ink-strong);line-height:1;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.delta-up{color:var(--up);font-size:12px} .delta-down{color:var(--down);font-size:12px}
+
+/* data table */
+table.data{width:100%;border-collapse:collapse;font-size:13.5px}
+table.data th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);text-align:left;
+  font-weight:600;padding:8px 12px;border-bottom:1px solid var(--hairline);background:var(--canvas-soft)}
+table.data td{padding:9px 12px;border-bottom:1px solid var(--hairline-2);color:var(--body);font-variant-numeric:tabular-nums}
+table.data tr:hover td{color:var(--ink)}
+.tablewrap{overflow-x:auto}
+
+/* annotation callout (the "designer's note" on a pattern) */
+.note{display:flex;gap:12px;border-left:2px solid var(--primary);background:var(--canvas-soft);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;padding:12px 16px;font-size:13.5px;color:var(--body)}
+.note b{color:var(--ink)}
+.note .k{font-family:var(--mono);font-size:11px;color:var(--primary-soft);letter-spacing:.05em;text-transform:uppercase;flex:0 0 auto}
+
+/* chat bubble / MCP-app frame */
+.chat{background:var(--canvas-soft);border:1px solid var(--hairline);border-radius:var(--r-md);padding:14px}
+.chat .msg{font-size:14px;color:var(--body);margin-bottom:10px}
+.mcp{border:1px solid var(--hairline);border-radius:var(--r-sm);background:var(--canvas);padding:12px}
+.mcp .mcp-actions{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--hairline-2)}
+
+/* mini legend */
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--mute);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:9px;height:9px;border-radius:2px;display:inline-block}
+svg{display:block;max-width:100%}
+
+/* ---- page-local helpers (built on the kit tokens only) ---- */
+.hero-band{padding:72px 0 48px}
+.section-kicker{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.section-kicker .n{font-family:var(--mono);font-size:12px;color:var(--primary-soft)}
+.stack{display:flex;flex-direction:column}
+.stack.g8{gap:8px}.stack.g10{gap:10px}.stack.g12{gap:12px}.stack.g16{gap:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tiny{font-size:12px}
+.hl{color:var(--ink);font-weight:600}
+.hlg{color:var(--primary-soft);font-weight:600}
+.anno{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--primary-soft)}
+.divider{height:1px;background:var(--hairline-2);margin:0}
+.pillrow{display:flex;flex-wrap:wrap;gap:6px}
+
+/* flow-scoped chrome */
+.flow-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.flow-tag{font-family:var(--mono);font-size:12px;color:var(--primary-soft);border:1px solid rgba(0,217,146,.4);
+  border-radius:var(--r-pill);padding:2px 11px;flex:0 0 auto}
+.flow-sub{font-size:13.5px;color:var(--mute);flex:0 0 auto}
+
+/* horizontal wrapping step sequence */
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin-top:22px}
+.fstep{flex:1 1 205px;min-width:195px;max-width:290px;background:var(--canvas);border:1px solid var(--hairline);
+  border-radius:var(--r-md);padding:16px 16px 15px;display:flex;flex-direction:column;gap:11px}
+.fstep.green{border-color:rgba(0,217,146,.5)}
+.fstep.fork{border-style:dashed;border-color:rgba(78,168,255,.45)}
+.fstep .sh{display:flex;align-items:center;gap:10px}
+.sn{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;
+  border:1px solid rgba(0,217,146,.5);color:var(--primary-soft);font-size:12px;font-weight:700;flex:0 0 auto;font-family:var(--mono)}
+.fstep.green .sn{background:rgba(0,217,146,.12)}
+.st{font-size:14px;font-weight:600;color:var(--ink);line-height:1.25}
+.sd{font-size:12.5px;color:var(--mute);line-height:1.45}
+.sd b{color:var(--body);font-weight:600}
+.farrow{flex:0 0 auto;align-self:center;color:var(--primary-soft);display:flex;align-items:center}
+@media(max-width:640px){.farrow{transform:rotate(90deg)}.fstep{max-width:none}}
+
+/* tiny schematic panel inside a step */
+.schem{background:var(--canvas-2);border:1px solid var(--hairline-2);border-radius:var(--r-sm);padding:10px;margin-top:auto}
+.schem .cap{font-size:10.5px;color:var(--mute);margin-top:7px;font-family:var(--mono)}
+.mini-menu{border:1px solid var(--hairline);border-radius:var(--r-sm);background:var(--canvas-2);padding:4px}
+.mini-menu .mi{padding:5px 8px;font-size:11.5px;color:var(--body);border-radius:4px;display:flex;gap:6px;align-items:center}
+.mini-menu .mi.on{background:rgba(0,217,146,.12);color:var(--ink)}
+.mini-menu .mi.dim{color:var(--mute)}
+.mini-field{display:flex;align-items:center;gap:7px;border:1px solid var(--hairline);border-radius:var(--r-pill);
+  background:var(--canvas);padding:5px 11px;font-size:11.5px;color:var(--body)}
+.mini-field .cur{width:1px;height:12px;background:var(--primary);display:inline-block}
+.readystrip{display:flex;align-items:center;gap:8px;border:1px solid rgba(0,217,146,.5);border-radius:var(--r-sm);
+  background:linear-gradient(180deg,rgba(0,217,146,.08),transparent);padding:8px 10px;font-size:11.5px;color:var(--ink)}
+.dashgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
+.dashgrid i{aspect-ratio:1.5/1;border-radius:2px;background:var(--hairline-2);display:block}
+.dashgrid i.on{background:rgba(0,217,146,.30)}
+.chip-s{display:inline-flex;align-items:center;gap:6px;font-size:11px;border:1px dashed var(--hairline);
+  border-radius:var(--r-pill);padding:3px 9px;color:var(--body);background:var(--canvas)}
+.chip-s .q{color:var(--primary-soft)}
+.legend-inline{display:flex;flex-wrap:wrap;gap:12px;font-size:11.5px;color:var(--mute);margin-top:14px}
+.legend-inline span{display:inline-flex;align-items:center;gap:6px}
+.legend-inline i{width:16px;height:0;border-top:2px solid;display:inline-block}
+.map-key{display:inline-flex;align-items:center;gap:6px}
+
+/* footer */
+.footer{padding:40px 0;border-top:1px solid var(--hairline);color:var(--mute);font-size:13px}
+.footer .wrap{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between}
+</style>
+
+<!-- 1 ================= STICKY NAV ================= -->
+<nav class="nav">
+  <div class="wrap">
+    <div class="brand">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="2" y="13" width="9" height="4.2" rx="1" fill="currentColor"/>
+        <rect x="13" y="13" width="9" height="4.2" rx="1" fill="currentColor" opacity=".55"/>
+        <rect x="7.5" y="7.4" width="9" height="4.2" rx="1" fill="currentColor" opacity=".8"/>
+        <rect x="2" y="1.8" width="9" height="4.2" rx="1" fill="currentColor" opacity=".4"/>
+        <rect x="13" y="1.8" width="9" height="4.2" rx="1" fill="currentColor" opacity=".65"/>
+      </svg>
+      Bricklayer
+    </div>
+    <span class="tag">Discovery · Brandcave · Jul 2026</span>
+  </div>
+</nav>
+
+<!-- 2 ================= HERO BAND ================= -->
+<header class="wrap hero-band">
+  <div class="eyebrow">User-Flow Wireframes</div>
+  <h1 style="max-width:15ch">How the work actually moves</h1>
+  <p class="lead" style="margin-top:22px">
+    The key journeys through Bricklayer, rebased to Direction v2 — a familiar HubSpot chassis of
+    <b style="color:var(--ink)">Dashboards</b> and <b style="color:var(--ink)">Reports</b>, with two chat surfaces layered on top:
+    a <b style="color:var(--ink)">right-docked, summonable co-working assistant</b> and a <b style="color:var(--ink)">full-page threaded chat</b>.
+    Six flows, from first login through building a whole dashboard by conversation to shipping a credit-ready packet.
+  </p>
+  <p class="small muted" style="margin-top:20px;max-width:72ch">
+    <b class="mono" style="color:var(--primary-soft)">How to read this</b> &nbsp;— Each flow is a left-to-right sequence of numbered
+    step-panels joined by arrows; the sequence wraps on narrow screens. These are <i>wireframes of the journey</i>, not pixel UIs —
+    schematics are deliberately rough, but every number is Ed's real POC data ($6.5B book · 3,935 appraisals). This is
+    Voltagent-DS-styled discovery documentation, not the shipping app.
+  </p>
+  <div class="pillrow" style="margin-top:22px">
+    <span class="pill green"><span class="dot"></span> 6 flows</span>
+    <span class="pill">Insights = the per-lens landing</span>
+    <span class="pill">Dashboards + Reports</span>
+    <span class="pill info">2 chat surfaces, 1 agent</span>
+    <span class="pill">Direction: v2 (HubSpot-anchored)</span>
+  </div>
+</header>
+
+<!-- 3 ================= FLOW 1 · ENTRY & LENS ================= -->
+<section class="band">
+  <div class="wrap">
+    <div class="section-kicker"><span class="n">Flow 1</span><div class="eyebrow" style="margin:0">Entry &amp; lens</div></div>
+    <div class="flow-head">
+      <span class="flow-tag">Provisioning → landing</span>
+      <h2 style="max-width:24ch">You're set to a lens before you ever log in.</h2>
+    </div>
+    <p class="lead" style="margin-top:14px">
+      The RBAC lens is decided at provisioning by RealWired — not chosen by the user, and <b style="color:var(--ink)">there is no role
+      switcher</b>. You arrive already reading the book through your lens.
+    </p>
+
+    <div class="flow">
+      <div class="fstep">
+        <div class="sh"><span class="sn">1</span><span class="st">Provisioning</span></div>
+        <p class="sd">RealWired's admin creates the account and <b>sets the RBAC lens</b> — e.g. <span class="hl">Lender · Credit Officer</span>. Lens is fixed here (D3, kept).</p>
+        <div class="schem">
+          <div class="row" style="gap:6px"><span class="pill crit" style="padding:2px 9px">Lender · Credit Officer</span></div>
+          <div class="cap">assigned by RealWired</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep">
+        <div class="sh"><span class="sn">2</span><span class="st">Invite sent</span></div>
+        <p class="sd">The officer gets an email invite to the bank's Bricklayer workspace. Nothing to configure — the lens rides on the account.</p>
+        <div class="schem">
+          <div class="mini-field"><span class="mono">✉ Join your bank's workspace</span></div>
+          <div class="cap">access inherits the lens</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep">
+        <div class="sh"><span class="sn">3</span><span class="st">Log in</span></div>
+        <p class="sd">Single sign-on. No role picker, no "which view?" prompt — the identity already carries the lens.</p>
+        <div class="schem">
+          <div class="mini-field"><span class="mono">SSO · continue</span><span class="cur" aria-hidden="true"></span></div>
+          <div class="cap">no role selection screen</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep">
+        <div class="sh"><span class="sn">4</span><span class="st">Book is read for you</span></div>
+        <p class="sd">Before the page paints, Bricklayer has already read all <span class="hl num">3,935</span> appraisals <b>through your lens</b> and prepared the AI "TODAY" narrative.</p>
+        <div class="schem">
+          <div class="row" style="gap:6px"><span class="badge-verified">✦ Bricklayer</span></div>
+          <div class="cap">Source: Data Lake · 3,935 appraisals</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep green">
+        <div class="sh"><span class="sn">5</span><span class="st">Land on Insights</span></div>
+        <p class="sd">You arrive on <b>Insights for your lens</b> — the opinion layer, not a grid of charts. Different lens, different landing.</p>
+        <div class="schem">
+          <div class="row" style="gap:6px"><span class="pill green"><span class="dot"></span> Insights · your lens</span></div>
+          <div class="cap">the role-based landing page</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:22px">
+      <span class="k">No switcher</span>
+      <span>The lens is set once, at provisioning, and shapes everything downstream — which findings surface, which focus charts,
+      which "surprising links." There is deliberately <b>no in-app role switcher</b>; the Lender and Portfolio-Manager landings are
+      genuinely different pages off the same book (DIRECTION-v2 §6, §9).</span>
+    </div>
+  </div>
+</section>
+
+<!-- 4 ================= FLOW 2 · DAILY LOOP ================= -->
+<section class="band">
+  <div class="wrap">
+    <div class="section-kicker"><span class="n">Flow 2</span><div class="eyebrow" style="margin:0">The daily loop</div></div>
+    <div class="flow-head">
+      <span class="flow-tag">Insights → read → drill</span>
+      <h2 style="max-width:26ch">Land in the state of your book, follow what stands out.</h2>
+    </div>
+    <p class="lead" style="margin-top:14px">
+      The everyday path: skim the read, let a finding catch your eye, get the critique, then either drill into one property or
+      open the full dashboard to browse.
+    </p>
+
+    <div class="flow">
+      <div class="fstep">
+        <div class="sh"><span class="sn">1</span><span class="st">Land on Insights</span></div>
+        <p class="sd">The per-lens landing. Three zones: an AI "TODAY" read, a list of finding-cards + surprising links, and a focus panel.</p>
+        <div class="schem">
+          <div class="dashgrid" style="grid-template-columns:1.1fr 1.4fr"><i class="on"></i><i></i></div>
+          <div class="cap">read · findings · focus</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep">
+        <div class="sh"><span class="sn">2</span><span class="st">Skim the "TODAY" read</span></div>
+        <p class="sd">A plain-language narrative: your <span class="hl num">$6.5B</span> book is sound but leans <span class="hl">25%</span> Residential, a third is going stale, and only <span class="num">15.0%</span> of extractions pass every check.</p>
+        <div class="schem">
+          <div class="row" style="gap:6px"><span class="badge-verified">✦ Bricklayer</span><span class="tiny muted">6 things stand out</span></div>
+          <div class="cap">Source: Data Lake · read at 08:14</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep">
+        <div class="sh"><span class="sn">3</span><span class="st">A finding catches your eye</span></div>
+        <p class="sd">You click a <b>finding-card</b> — "1,233 appraisals aged past 24 months — <span class="num">$1.18B</span>." Claim first, evidence attached.</p>
+        <div class="schem">
+          <div class="row" style="gap:6px"><span class="pill">Staleness</span><span class="tiny hl">$1.18B</span></div>
+          <div class="cap">claim → evidence → read → action</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep green">
+        <div class="sh"><span class="sn">4</span><span class="st">Focus panel + READ</span></div>
+        <p class="sd">The card expands with the evidence chart and <b>BRICKLAYER'S READ</b> — it critiques its own number: the real exposure is the Office &gt;48-mo corner (<span class="num">$310M</span>), not the raw count.</p>
+        <div class="schem">
+          <div class="row" style="gap:6px"><span class="anno">◆ Bricklayer's read</span></div>
+          <div class="cap">skeptical by default</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep fork">
+        <div class="sh"><span class="sn">5</span><span class="st">Drill or browse</span></div>
+        <p class="sd">The read ends in a doorway, not a dead end. <b>Either</b> drill into a single property workspace <b>or</b> open the full dashboard to browse the tiles.</p>
+        <div class="schem">
+          <div class="stack g8">
+            <span class="chip-s"><span class="q">↳</span> Open property workspace</span>
+            <span class="chip-s"><span class="q">↳</span> Open full dashboard</span>
+          </div>
+          <div class="cap">a fork — two exits</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:22px">
+      <span class="k">Two layers</span>
+      <span>Insights <b>argues</b> (claim → evidence → read → action); the dashboard <b>browses</b>. Step 5 is the hand-off between
+      them — the same data lake, a different job. This is the loop most days start in.</span>
+    </div>
+  </div>
+</section>
+
+<!-- 5 ================= FLOW 3 · ASK → CHART → SAVE ================= -->
+<section class="band">
+  <div class="wrap">
+    <div class="section-kicker"><span class="n">Flow 3</span><div class="eyebrow" style="margin:0">Ask → chart → save</div></div>
+    <div class="flow-head">
+      <span class="flow-tag">Chat builds a report</span>
+      <h2 style="max-width:26ch">Ask for a chart, get an MCP app, save it to a dashboard.</h2>
+    </div>
+    <p class="lead" style="margin-top:14px">
+      Chat returns an interactive <b style="color:var(--ink)">MCP app</b> — not text, not a static image — carrying Save / Edit.
+      Save opens the <b style="color:var(--ink)">app-level modal</b>, not an in-chat drawer.
+    </p>
+
+    <div class="flow">
+      <div class="fstep">
+        <div class="sh"><span class="sn">1</span><span class="st">Summon the chat</span></div>
+        <p class="sd"><b>⌘K</b> opens the right-docked co-working assistant, page-aware. Or open full-page chat for a book-wide question.</p>
+        <div class="schem">
+          <div class="row" style="gap:6px"><span class="pill">⌘K</span><span class="tiny muted">right-docked · summonable</span></div>
+          <div class="cap">promotable to full-page</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep">
+        <div class="sh"><span class="sn">2</span><span class="st">Ask for it</span></div>
+        <p class="sd">Type it in plain language — Ed's own example: <span class="hl">"value vs cap rate as a scatter."</span></p>
+        <div class="schem">
+          <div class="mini-field"><span class="mono">value vs cap as a scatter</span><span class="cur" aria-hidden="true"></span></div>
+          <div class="cap">natural language in</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep">
+        <div class="sh"><span class="sn">3</span><span class="st">Agent returns a chart</span></div>
+        <p class="sd">An MCP-app <b>scatter + trend line</b>, built on the fly from a closed set of typed widgets — with <b>Save / Edit</b> affordances.</p>
+        <div class="schem">
+          <svg viewBox="0 0 150 74" role="img" aria-label="Value versus cap rate scatter with trend line">
+            <line x1="16" y1="8" x2="16" y2="62" stroke="var(--grid)"/>
+            <line x1="16" y1="62" x2="144" y2="62" stroke="var(--grid)"/>
+            <circle cx="34" cy="50" r="2.6" fill="var(--c2)" opacity=".85"/>
+            <circle cx="52" cy="44" r="2.6" fill="var(--c2)" opacity=".85"/>
+            <circle cx="66" cy="38" r="2.6" fill="var(--c2)" opacity=".85"/>
+            <circle cx="82" cy="34" r="2.6" fill="var(--c2)" opacity=".85"/>
+            <circle cx="98" cy="26" r="2.6" fill="var(--c2)" opacity=".85"/>
+            <circle cx="118" cy="22" r="2.6" fill="var(--c2)" opacity=".85"/>
+            <circle cx="130" cy="16" r="3" fill="var(--primary)"/>
+            <line x1="24" y1="54" x2="136" y2="16" stroke="var(--primary)" stroke-width="1.4" stroke-dasharray="4 3"/>
+          </svg>
+          <div class="cap">MCP app · Save / Edit</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep">
+        <div class="sh"><span class="sn">4</span><span class="st">Save → app-level modal</span></div>
+        <p class="sd"><b>Save</b> opens the shared editor modal — the same one a dashboard's "Add content" opens. One editor, two entry points; chat never traps the flow in a drawer.</p>
+        <div class="schem">
+          <div class="mini-menu">
+            <div class="mi dim">Don't add to a dashboard</div>
+            <div class="mi on">Add to existing dashboard</div>
+            <div class="mi dim">Add to a new dashboard</div>
+          </div>
+          <div class="cap">then set access</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep green">
+        <div class="sh"><span class="sn">5</span><span class="st">Lands as a tile</span></div>
+        <p class="sd">The report attaches to the chosen dashboard and inherits its access. The same component now renders as a dashboard <b>tile</b> instead of a chat MCP app.</p>
+        <div class="schem">
+          <div class="dashgrid"><i></i><i class="on"></i><i></i><i></i></div>
+          <div class="cap">Source: Data Lake · value vs cap</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:22px">
+      <span class="k">Both forms, one component</span>
+      <span>The scatter is the <b>same widget</b> whether it's a chat MCP app or a dashboard tile — chat-framed with Save/Edit in one,
+      resizable/rearrangeable in the other. This is a headline flow from the course-correction call (DIRECTION-v2 §2, §3, §4).</span>
+    </div>
+  </div>
+</section>
+
+<!-- 6 ================= FLOW 4 · BUILD A WHOLE DASHBOARD ================= -->
+<section class="band">
+  <div class="wrap">
+    <div class="section-kicker"><span class="n">Flow 4</span><div class="eyebrow" style="margin:0">Build a whole dashboard on the fly</div></div>
+    <div class="flow-head">
+      <span class="flow-tag">Ed's "most powerful function"</span>
+      <h2 style="max-width:26ch">Describe a dashboard; the agent assembles the whole thing.</h2>
+    </div>
+    <p class="lead" style="margin-top:14px">
+      Not one tile — a whole board. Elevate whole-dashboard generation to a headline capability alongside single-report generation
+      (DIRECTION-v2 §11).
+    </p>
+
+    <div class="flow">
+      <div class="fstep">
+        <div class="sh"><span class="sn">1</span><span class="st">New-dashboard empty state</span></div>
+        <p class="sd">Start a fresh dashboard and hit the empty state — a <b>"Build this board"</b> prompt instead of a blank grid.</p>
+        <div class="schem">
+          <div class="dashgrid"><i></i><i></i><i></i><i></i></div>
+          <div class="cap">empty canvas · describe it</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep">
+        <div class="sh"><span class="sn">2</span><span class="st">Describe it / pick a chip</span></div>
+        <p class="sd">Type the intent, or click a <b>suggestion chip</b> — e.g. <span class="hl">"concentration &amp; cap-rate risk dashboard."</span></p>
+        <div class="schem">
+          <div class="stack g8">
+            <span class="chip-s"><span class="q">✦</span> Concentration &amp; cap-rate risk</span>
+            <span class="chip-s"><span class="q">✦</span> Valuation staleness review</span>
+          </div>
+          <div class="cap">describe or pick</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep">
+        <div class="sh"><span class="sn">3</span><span class="st">Agent reasons over the book</span></div>
+        <p class="sd">Cross-object, book-wide reasoning across the whole data lake — it chooses which reports belong together and how to lay them out.</p>
+        <div class="schem">
+          <div class="row" style="gap:6px"><span class="badge-verified">✦ Bricklayer</span><span class="tiny muted">assembling…</span></div>
+          <div class="cap">closed set of typed widgets</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep green">
+        <div class="sh"><span class="sn">4</span><span class="st">"NEW BOARD READY"</span></div>
+        <p class="sd">A confirmation: <b>NEW BOARD READY · 13 widgets</b>. It's staged, not yet forced on you.</p>
+        <div class="schem">
+          <div class="readystrip"><span class="dot"></span> NEW BOARD READY · <span class="num">13 widgets</span></div>
+          <div class="cap">staged for review</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep">
+        <div class="sh"><span class="sn">5</span><span class="st">Open — current kept</span></div>
+        <p class="sd">Open the new board; <b>your current one is kept</b>. Nothing you had is overwritten — the generated board is additive.</p>
+        <div class="schem">
+          <div class="dashgrid"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>
+          <div class="cap">non-destructive</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep">
+        <div class="sh"><span class="sn">6</span><span class="st">Present / export</span></div>
+        <p class="sd">Take it into <b>Present mode</b> for a meeting, or export it — the same deliverable actions that hang off any dashboard (see Flow 6).</p>
+        <div class="schem">
+          <div class="stack g8">
+            <span class="chip-s"><span class="q">▸</span> Present mode</span>
+            <span class="chip-s"><span class="q">▸</span> Export packet</span>
+          </div>
+          <div class="cap">actions, not a tab</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:22px">
+      <span class="k">The wedge</span>
+      <span>HubSpot's Breeze is a prompt-to-single-report generator, single-object only. Building a coherent 13-widget dashboard by
+      reasoning across the <b>whole appraisal book</b> is exactly where Bricklayer beats it — Ed called this the "most powerful
+      function" (DIRECTION-v2 §8, §11).</span>
+    </div>
+  </div>
+</section>
+
+<!-- 7 ================= FLOW 5 · EXPLAIN THIS ================= -->
+<section class="band">
+  <div class="wrap">
+    <div class="section-kicker"><span class="n">Flow 5</span><div class="eyebrow" style="margin:0">"Explain this"</div></div>
+    <div class="flow-head">
+      <span class="flow-tag">Right-click → reason</span>
+      <h2 style="max-width:26ch">Right-click a watchlist row, get the reasoning in chat.</h2>
+    </div>
+    <p class="lead" style="margin-top:14px">
+      A named, context-scoped invocation of the docked co-working chat — one of Ed's clearest "this is what we want people to feel"
+      moments (DIRECTION-v2 §11).
+    </p>
+
+    <div class="flow">
+      <div class="fstep">
+        <div class="sh"><span class="sn">1</span><span class="st">Right-click a row</span></div>
+        <p class="sd">On the <b>Risk watchlist</b> (scored 0–100 + a WHY column), right-click a flagged property.</p>
+        <div class="schem">
+          <div class="tablewrap">
+            <table class="data" style="font-size:11.5px">
+              <tbody>
+                <tr><td>1033 E Lake Dr</td><td class="num">62</td></tr>
+                <tr><td style="color:var(--ink)">907 W. Fifth Ave</td><td class="num" style="color:var(--crit)">88</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="cap">scored 0–100 · WHY column</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep">
+        <div class="sh"><span class="sn">2</span><span class="st">"Explain this property"</span></div>
+        <p class="sd">The context menu's first item. It turns the row into a question and scopes the chat to <span class="hl">907 W. Fifth Avenue</span>.</p>
+        <div class="schem">
+          <div class="mini-menu">
+            <div class="mi on">🔍 Explain this property</div>
+            <div class="mi dim">Open property workspace</div>
+            <div class="mi dim">Pin row to dashboard</div>
+          </div>
+          <div class="cap">context-scoped invocation</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep green">
+        <div class="sh"><span class="sn">3</span><span class="st">Agent reasons in chat</span></div>
+        <p class="sd">The docked co-working chat explains <b>why it's flagged</b>: cap rate <span class="num">7.50%</span> below class avg, <span class="num">49mo</span> stale, and thin comp support — three flags stacking.</p>
+        <div class="schem">
+          <div class="row" style="gap:6px"><span class="pill">Looking at: 907 W. Fifth Ave</span></div>
+          <div class="cap">Source: Data Lake · Gastonia, NC</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep">
+        <div class="sh"><span class="sn">4</span><span class="st">Open property workspace</span></div>
+        <p class="sd">The reasoning ends with a doorway: open the full property workspace — valuation-approach variance, cap-rate sensitivity, comps with a CoV badge, appraisal detail.</p>
+        <div class="schem">
+          <span class="chip-s"><span class="q">→</span> Open property workspace</span>
+          <div class="cap">per-tile provenance</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:22px">
+      <span class="k">Named pattern</span>
+      <span>Right-click on a <b>tile or table row</b> is the entry point for a context-scoped co-working invocation. It's not a
+      separate feature — it's the docked assistant, summoned <em>about a specific thing</em>, ending in a hand-off to the property
+      workspace.</span>
+    </div>
+  </div>
+</section>
+
+<!-- 8 ================= FLOW 6 · DELIVERABLES ================= -->
+<section class="band">
+  <div class="wrap">
+    <div class="section-kicker"><span class="n">Flow 6</span><div class="eyebrow" style="margin:0">Deliverables</div></div>
+    <div class="flow-head">
+      <span class="flow-tag">Actions, not a destination</span>
+      <h2 style="max-width:26ch">Export, credit-note, present — hung off a dashboard.</h2>
+    </div>
+    <p class="lead" style="margin-top:14px">
+      Ed called export the "average → great" gap. In a Dashboards + Reports world it's <b style="color:var(--ink)">not a tab</b> —
+      it's <b style="color:var(--ink)">actions</b> on dashboards and reports (DIRECTION-v2 §7).
+    </p>
+
+    <div class="flow">
+      <div class="fstep">
+        <div class="sh"><span class="sn">1</span><span class="st">From a dashboard</span></div>
+        <p class="sd">Start on any dashboard (or a single report). The deliverable actions live in its menu — nowhere else.</p>
+        <div class="schem">
+          <div class="row" style="gap:6px"><span class="pill">Dashboard ⋯</span></div>
+          <div class="cap">not its own tab</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep">
+        <div class="sh"><span class="sn">2</span><span class="st">Export as credit-ready packet</span></div>
+        <p class="sd">One action turns the dashboard into a <b>credit-ready packet</b> — the numbers plus their provenance, framed for committee.</p>
+        <div class="schem">
+          <span class="chip-s"><span class="q">▸</span> Export as credit-ready packet</span>
+          <div class="cap">receipts travel with it</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep">
+        <div class="sh"><span class="sn">3</span><span class="st">Create the credit note</span></div>
+        <p class="sd">For a specific property, generate <b>the credit note</b> — the drafted write-up, not just a chart dump.</p>
+        <div class="schem">
+          <span class="chip-s"><span class="q">▸</span> Create the credit note</span>
+          <div class="cap">per-property deliverable</div>
+        </div>
+      </div>
+      <div class="farrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>
+
+      <div class="fstep green">
+        <div class="sh"><span class="sn">4</span><span class="st">Present mode</span></div>
+        <p class="sd">Spin up an <b>ephemeral dashboard</b> built for one meeting — full-screen Present mode, then it expires. The good part of "boards" kept; only the word died.</p>
+        <div class="schem">
+          <div class="row" style="gap:6px"><span class="pill watch" style="padding:2px 9px">Ephemeral · expires</span></div>
+          <div class="cap">built for one meeting</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:22px">
+      <span class="k">Not a destination</span>
+      <span>These four are <b>actions attached to dashboards and reports</b>, not a "Deliverables" tab. The board lifecycle Ed liked
+      — draft / saved / ephemeral / present-mode — is re-hung on Dashboards; export stays first-class as a <em>capability</em>, not a
+      place you navigate to (DIRECTION-v2 §5, §7).</span>
+    </div>
+  </div>
+</section>
+
+<!-- 9 ================= FOOTER ================= -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="brand">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="2" y="13" width="9" height="4.2" rx="1" fill="currentColor"/>
+        <rect x="13" y="13" width="9" height="4.2" rx="1" fill="currentColor" opacity=".55"/>
+        <rect x="7.5" y="7.4" width="9" height="4.2" rx="1" fill="currentColor" opacity=".8"/>
+        <rect x="2" y="1.8" width="9" height="4.2" rx="1" fill="currentColor" opacity=".4"/>
+        <rect x="13" y="1.8" width="9" height="4.2" rx="1" fill="currentColor" opacity=".65"/>
+      </svg>
+      Bricklayer
+    </div>
+    <div class="small muted">
+      Brandcave · Bricklayer discovery · July 2026 · Direction: <span class="mono">DIRECTION-v2-hubspot-anchored.md</span>
+    </div>
+  </div>
+</footer>

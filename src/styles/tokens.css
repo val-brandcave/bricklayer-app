@@ -1,0 +1,209 @@
+/* ============================================================
+   Bricklayer — design tokens (single source of truth)
+   Derived from docs/design-system/design-tokens.md.
+   LOCKED in the build session (2026-07-20):
+     • Primary interactive hue = Indigo-2 #653ED3 (light) / #9B86F5 (dark)
+     • No mono font, ever — figures use tabular-nums on Geist Sans
+     • Gradient reserved for brand moments + summon-AI + one hero CTA
+   Light is the base on :root; dark applies via prefers-color-scheme
+   (unless force-light) and via the explicit [data-theme] toggle.
+   Style components ONLY through these variables — never literal hex.
+   ============================================================ */
+
+:root {
+  /* ---- surfaces (cool, blue-violet-biased neutrals) ---- */
+  --canvas: #f7f8fc;
+  --surface: #ffffff;
+  --surface-2: #f1f3fa;
+  --surface-3: #e9ecf7;
+  --hairline: #e2e5f0;
+  --hairline-2: #edeff7;
+  --border-strong: #cdd2e4;
+
+  /* ---- text ---- */
+  --ink: #171d3d;
+  --body: #434a67;
+  --muted: #767d9c;
+  --faint: #a3a9c2;
+
+  /* ---- primary (interactive) — LOCKED to Indigo-2 ---- */
+  --primary: #653ed3;
+  --primary-hover: #5730bd;
+  --primary-active: #48279e;
+  --on-primary: #ffffff;
+  --primary-soft: #eeeafb;
+  --ring: #653ed366;
+
+  /* ---- semantics (distinct from brand) ---- */
+  --success: #1f8f5f;
+  --success-soft: #e4f4ec;
+  --danger: #d22b4e;
+  --danger-soft: #fbe7ec;
+  --warning: #b7791f;
+  --warning-soft: #f7eedb;
+  --info: #2563c9;
+  --info-soft: #e5edfb;
+
+  /* ---- deltas (data) ---- */
+  --up: #1f8f5f;
+  --down: #d22b4e;
+  --watch: #b7791f;
+
+  /* ---- data-visualization series ---- */
+  --c1: #5037cc;
+  --c2: #2e9bd6;
+  --c3: #b65cee;
+  --c4: #e08a2b;
+  --c5: #d94f6c;
+  --c6: #1fa085;
+  --c7: #b99a2e;
+  --c8: #6e7699;
+  --grid: #e7e9f3;
+
+  /* ---- elevation (light = soft shadows) ---- */
+  --shadow-sm: 0 1px 2px rgba(23, 29, 61, 0.06), 0 1px 3px rgba(23, 29, 61, 0.05);
+  --shadow-md: 0 4px 12px rgba(23, 29, 61, 0.08), 0 2px 4px rgba(23, 29, 61, 0.05);
+  --shadow-lg: 0 16px 40px rgba(23, 29, 61, 0.14);
+
+  /* ---- brand (theme-independent) ---- */
+  --brand-blue: #1420b9;
+  --brand-indigo: #5037cc;
+  --brand-indigo-2: #653ed3;
+  --brand-violet: #7645d9;
+  --brand-violet-2: #b65cee;
+  --brand-ink: #171d3d;
+  /* decorative gradient — logo, sign-in hero, empty-state art. Never behind data/text. */
+  --brand-gradient: linear-gradient(135deg, #1420b9 0%, #653ed3 55%, #b65cee 100%);
+  /* action gradient — summon-AI + one hero CTA. Contrast-safe (stops at #8b44e0, 5.25:1 white). */
+  --brand-gradient-action: linear-gradient(120deg, #1420b9 0%, #5037cc 50%, #8b44e0 100%);
+
+  /* ---- shape (theme-independent) ---- */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+  --r-pill: 9999px;
+
+  /* ---- spacing scale (4-based, theme-independent) ---- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+
+  /* ---- type (Geist Sans only — no mono) ---- */
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* ---- motion ---- */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur: 160ms;
+}
+
+/* Dark via OS preference (unless the user has forced light) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --canvas: #0c0e1a;
+    --surface: #14172a;
+    --surface-2: #1b1f36;
+    --surface-3: #232842;
+    --hairline: #282d48;
+    --hairline-2: #1f2338;
+    --border-strong: #3a4066;
+
+    --ink: #f5f6fc;
+    --body: #c3c8de;
+    --muted: #888fb0;
+    --faint: #5b6188;
+
+    --primary: #9b86f5;
+    --primary-hover: #ac99f8;
+    --primary-active: #beaffa;
+    --on-primary: #16182e;
+    --primary-soft: #24223f;
+    --ring: #9b86f588;
+
+    --success: #34d399;
+    --success-soft: rgba(52, 211, 153, 0.14);
+    --danger: #fb7185;
+    --danger-soft: rgba(251, 113, 133, 0.15);
+    --warning: #fbbf4d;
+    --warning-soft: rgba(251, 191, 77, 0.14);
+    --info: #60a5fa;
+    --info-soft: rgba(96, 165, 250, 0.14);
+
+    --up: #34d399;
+    --down: #fb7185;
+    --watch: #fbbf4d;
+
+    --c1: #8e7bf2;
+    --c2: #4fb3e6;
+    --c3: #c77df2;
+    --c4: #f0a64d;
+    --c5: #f2718e;
+    --c6: #35c2a2;
+    --c7: #d8bc4e;
+    --c8: #8b93b5;
+    --grid: #242a44;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* Explicit dark toggle — wins in both directions */
+:root[data-theme="dark"] {
+  --canvas: #0c0e1a;
+  --surface: #14172a;
+  --surface-2: #1b1f36;
+  --surface-3: #232842;
+  --hairline: #282d48;
+  --hairline-2: #1f2338;
+  --border-strong: #3a4066;
+
+  --ink: #f5f6fc;
+  --body: #c3c8de;
+  --muted: #888fb0;
+  --faint: #5b6188;
+
+  --primary: #9b86f5;
+  --primary-hover: #ac99f8;
+  --primary-active: #beaffa;
+  --on-primary: #16182e;
+  --primary-soft: #24223f;
+  --ring: #9b86f588;
+
+  --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.14);
+  --danger: #fb7185;
+  --danger-soft: rgba(251, 113, 133, 0.15);
+  --warning: #fbbf4d;
+  --warning-soft: rgba(251, 191, 77, 0.14);
+  --info: #60a5fa;
+  --info-soft: rgba(96, 165, 250, 0.14);
+
+  --up: #34d399;
+  --down: #fb7185;
+  --watch: #fbbf4d;
+
+  --c1: #8e7bf2;
+  --c2: #4fb3e6;
+  --c3: #c77df2;
+  --c4: #f0a64d;
+  --c5: #f2718e;
+  --c6: #35c2a2;
+  --c7: #d8bc4e;
+  --c8: #8b93b5;
+  --grid: #242a44;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.6);
+}

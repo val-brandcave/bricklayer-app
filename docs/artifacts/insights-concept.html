@@ -1,0 +1,817 @@
+<title>Bricklayer — Insights (per-lens landing)</title>
+<style>
+:root{
+  /* Voltagent surface + brand */
+  --canvas:#101010; --canvas-soft:#1a1a1a; --canvas-2:#141414;
+  --hairline:#3d3a39; --hairline-2:#2a2827;
+  --primary:#00d992; --primary-soft:#2fd6a1; --primary-deep:#10b981; --on-primary:#101010;
+  --ink-strong:#ffffff; --ink:#f2f2f2; --body:#bdbdbd; --mute:#8b949e;
+  /* semantic (separate from brand green) */
+  --up:#3fd07f; --down:#ff6b6b; --watch:#ffb84d; --crit:#ff5d5d; --info:#4ea8ff;
+  /* categorical data-viz palette (reads on #101010) */
+  --c1:#00d992; --c2:#4ea8ff; --c3:#b98cff; --c4:#ffb84d; --c5:#ff7a8a; --c6:#38d6c4; --c7:#d4d867; --c8:#8b9bb4;
+  --grid:#2a2827;
+  --font:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"SFMono-Regular",Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+  --r-sm:6px; --r-md:8px; --r-pill:9999px;
+  --maxw:1200px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--canvas);color:var(--ink);
+  font-family:var(--font);font-size:16px;line-height:1.65;
+  font-feature-settings:"calt","rlig";-webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4{margin:0;font-weight:400;letter-spacing:-.02em;color:var(--ink-strong);text-wrap:balance}
+h1{font-size:clamp(34px,5vw,60px);line-height:1.02;letter-spacing:-.025em}
+h2{font-size:clamp(26px,3.2vw,36px);line-height:1.1;letter-spacing:-.025em}
+h3{font-size:22px;font-weight:600;line-height:1.25}
+h4{font-size:16px;font-weight:600;color:var(--ink)}
+p{margin:0}
+a{color:var(--primary-deep);text-decoration:none}
+a:hover{color:var(--primary-soft)}
+::selection{background:rgba(0,217,146,.24);color:#fff}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:2px}
+.mono{font-family:var(--mono)}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px}
+.band{padding:56px 0;border-top:1px dashed rgba(79,93,117,.4)}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--primary-soft);margin-bottom:14px}
+.lead{color:var(--body);font-size:18px;line-height:1.6;max-width:70ch}
+.muted{color:var(--mute)}
+.small{font-size:14px;line-height:1.5}
+
+/* top nav */
+.nav{position:sticky;top:0;z-index:50;background:rgba(16,16,16,.86);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--hairline)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:56px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--ink-strong);font-size:15px}
+.brand .glyph{width:18px;height:18px;color:var(--primary)}
+.nav .tag{font-size:12px;color:var(--mute);border:1px solid var(--hairline);border-radius:var(--r-pill);padding:3px 10px}
+
+/* cards / chrome */
+.card{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-md);padding:24px}
+.card.soft{background:var(--canvas-soft)}
+.card.emph{border-width:2px;border-color:var(--hairline)}
+.card.green{border-color:rgba(0,217,146,.5)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:900px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+/* chips / pills / badges */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;border:1px solid var(--hairline);
+  border-radius:var(--r-pill);padding:3px 10px;color:var(--ink);background:var(--canvas);white-space:nowrap}
+.pill.green{border-color:rgba(0,217,146,.45);color:var(--primary-soft)}
+.pill.watch{border-color:rgba(255,184,77,.5);color:var(--watch)}
+.pill.crit{border-color:rgba(255,93,93,.5);color:var(--crit)}
+.pill.info{border-color:rgba(78,168,255,.5);color:var(--info)}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--primary)}
+.badge-verified{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--primary-soft);
+  border:1px solid rgba(0,217,146,.4);border-radius:var(--r-pill);padding:2px 9px}
+.tag-type{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:600}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font);font-weight:600;font-size:14px;
+  border-radius:var(--r-sm);padding:9px 15px;border:1px solid transparent;cursor:pointer;transition:transform .12s,background .12s,border-color .12s}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--primary);color:var(--on-primary)}
+.btn-outline{background:var(--canvas);color:var(--ink);border-color:var(--hairline)}
+.btn-ghost{background:transparent;color:var(--primary-soft);padding:9px 6px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.btn:hover{transform:none}}
+
+/* provenance line */
+.prov{font-family:var(--mono);font-size:11px;color:var(--mute);display:flex;align-items:center;gap:6px;margin-top:10px}
+.prov::before{content:"";width:11px;height:11px;flex:0 0 auto;
+  background:linear-gradient(135deg,var(--primary),transparent);border-radius:2px;opacity:.7}
+
+/* KPI stat */
+.kpi{display:flex;flex-direction:column;gap:3px}
+.kpi .v{font-size:26px;font-weight:600;color:var(--ink-strong);line-height:1;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.delta-up{color:var(--up);font-size:12px} .delta-down{color:var(--down);font-size:12px}
+
+/* data table */
+table.data{width:100%;border-collapse:collapse;font-size:13.5px}
+table.data th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);text-align:left;
+  font-weight:600;padding:8px 12px;border-bottom:1px solid var(--hairline);background:var(--canvas-soft)}
+table.data td{padding:9px 12px;border-bottom:1px solid var(--hairline-2);color:var(--body);font-variant-numeric:tabular-nums}
+table.data tr:hover td{color:var(--ink)}
+.tablewrap{overflow-x:auto}
+
+/* annotation callout (the "designer's note" on a pattern) */
+.note{display:flex;gap:12px;border-left:2px solid var(--primary);background:var(--canvas-soft);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;padding:12px 16px;font-size:13.5px;color:var(--body)}
+.note b{color:var(--ink)}
+.note .k{font-family:var(--mono);font-size:11px;color:var(--primary-soft);letter-spacing:.05em;text-transform:uppercase;flex:0 0 auto}
+
+/* chat bubble / MCP-app frame */
+.chat{background:var(--canvas-soft);border:1px solid var(--hairline);border-radius:var(--r-md);padding:14px}
+.chat .msg{font-size:14px;color:var(--body);margin-bottom:10px}
+.mcp{border:1px solid var(--hairline);border-radius:var(--r-sm);background:var(--canvas);padding:12px}
+.mcp .mcp-actions{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--hairline-2)}
+
+/* mini legend */
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--mute);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:9px;height:9px;border-radius:2px;display:inline-block}
+svg{display:block;max-width:100%}
+
+/* ---- page-specific helpers (compose the kit; no new aesthetic) ---- */
+.section-kicker{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.section-kicker .n{font-family:var(--mono);font-size:12px;color:var(--primary-soft)}
+.stack{display:flex;flex-direction:column}
+.stack.g8{gap:8px}.stack.g12{gap:12px}.stack.g16{gap:16px}.stack.g24{gap:24px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.divider{height:1px;background:var(--hairline-2);margin:0}
+.tiny{font-size:12px}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;border:1px dashed var(--hairline);
+  border-radius:var(--r-pill);padding:5px 12px;color:var(--body);background:var(--canvas);cursor:pointer}
+.chip:hover{border-color:rgba(0,217,146,.45);color:var(--ink)}
+.chip .q{color:var(--primary-soft)}
+/* finding-card */
+.fcard{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-md);padding:16px;cursor:pointer;
+  transition:border-color .12s,background .12s}
+.fcard:hover{border-color:rgba(0,217,146,.35)}
+.fcard.active{border-color:rgba(0,217,146,.6);background:var(--canvas-2)}
+.fcard .head{display:flex;gap:10px;align-items:flex-start}
+.ficon{width:30px;height:30px;flex:0 0 auto;border-radius:var(--r-sm);border:1px solid var(--hairline-2);
+  display:grid;place-items:center;background:var(--canvas-soft);color:var(--primary-soft)}
+.fclaim{font-size:14.5px;font-weight:600;color:var(--ink);line-height:1.3}
+.fev{font-size:13px;color:var(--mute);margin-top:4px;line-height:1.45}
+/* the input field mock */
+.field{display:flex;align-items:center;gap:8px;border:1px solid var(--hairline);border-radius:var(--r-sm);
+  background:var(--canvas-2);padding:9px 12px;color:var(--mute);font-size:13.5px}
+.field .cursor{width:1px;height:15px;background:var(--primary);display:inline-block}
+/* read block */
+.read{border:1px solid rgba(0,217,146,.4);border-radius:var(--r-sm);background:linear-gradient(180deg,rgba(0,217,146,.05),transparent);padding:14px}
+.read .rhead{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.read .rlabel{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--primary-soft);font-weight:600}
+.read p{font-size:13.5px;color:var(--body);line-height:1.55}
+.read .crit{color:var(--ink)}
+/* skeleton loader */
+.sk{height:11px;border-radius:3px;background:linear-gradient(90deg,var(--hairline-2),var(--hairline),var(--hairline-2));
+  background-size:200% 100%;animation:shimmer 1.4s linear infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){.sk{animation:none;background:var(--hairline-2)}}
+.thumbs{display:inline-flex;gap:6px}
+.thumbs button{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-sm);
+  color:var(--mute);cursor:pointer;padding:4px 8px;font-size:13px}
+.thumbs button:hover{color:var(--ink);border-color:rgba(0,217,146,.4)}
+/* context menu mock */
+.ctxmenu{border:1px solid var(--hairline);border-radius:var(--r-sm);background:var(--canvas-2);
+  padding:5px;box-shadow:0 8px 30px rgba(0,0,0,.5);width:230px}
+.ctxmenu .item{padding:7px 10px;font-size:13px;color:var(--body);border-radius:4px;display:flex;gap:8px;align-items:center}
+.ctxmenu .item.on{background:rgba(0,217,146,.12);color:var(--ink)}
+.ctxmenu .item.dim{color:var(--mute)}
+.ctxmenu .sep{height:1px;background:var(--hairline-2);margin:5px 6px}
+/* step panels */
+.steps{counter-reset:step}
+.stepn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;
+  border:1px solid rgba(0,217,146,.5);color:var(--primary-soft);font-size:12px;font-weight:600;flex:0 0 auto}
+/* lens columns */
+.lens-col h4{display:flex;align-items:center;gap:8px}
+.lens-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--hairline-2);font-size:13.5px;color:var(--body)}
+.lens-item:last-child{border-bottom:0}
+.lens-item .lk{font-family:var(--mono);font-size:10.5px;color:var(--mute);letter-spacing:.06em;text-transform:uppercase;flex:0 0 74px;padding-top:2px}
+/* callout arrow annotations */
+.anno{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--primary-soft)}
+.surprise{border:1px solid var(--hairline);border-left:2px solid var(--c3);border-radius:0 var(--r-sm) var(--r-sm) 0;
+  background:var(--canvas);padding:13px 14px;cursor:pointer;transition:border-color .12s}
+.surprise:hover{border-left-color:var(--c3);border-color:rgba(185,140,255,.35)}
+.footer{padding:40px 0;border-top:1px solid var(--hairline);color:var(--mute)}
+.footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;align-items:center}
+.tag-scenario{font-size:11px;color:var(--watch);border:1px solid rgba(255,184,77,.4);border-radius:var(--r-pill);padding:2px 8px}
+.legend-note{font-size:12px;color:var(--mute);max-width:62ch;line-height:1.5}
+.hl{color:var(--ink);font-weight:600}
+.hlg{color:var(--primary-soft);font-weight:600}
+.zone-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.zone-label .b{width:14px;height:2px;background:var(--primary);display:inline-block}
+</style>
+
+<!-- ============================ 1. STICKY NAV ============================ -->
+<nav class="nav">
+  <div class="wrap">
+    <div class="brand">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="2" y="13" width="9" height="4.2" rx="1" fill="currentColor"/>
+        <rect x="13" y="13" width="9" height="4.2" rx="1" fill="currentColor" opacity=".55"/>
+        <rect x="7.5" y="7.4" width="9" height="4.2" rx="1" fill="currentColor" opacity=".8"/>
+        <rect x="2" y="1.8" width="9" height="4.2" rx="1" fill="currentColor" opacity=".4"/>
+        <rect x="13" y="1.8" width="9" height="4.2" rx="1" fill="currentColor" opacity=".65"/>
+      </svg>
+      Bricklayer
+    </div>
+    <span class="tag">Discovery · Brandcave · Jul 2026</span>
+  </div>
+</nav>
+
+<!-- ============================ 2. HERO BAND ============================ -->
+<header class="band" style="border-top:0;padding-top:64px">
+  <div class="wrap">
+    <div class="eyebrow">Insights — the per-lens landing</div>
+    <h1 style="max-width:16ch">You land in the state of your book — read through your lens.</h1>
+    <p class="lead" style="margin-top:22px">
+      Insights is the <span class="hl">opinion layer</span>. On login you arrive here — not on a grid of charts — and Bricklayer
+      proactively raises what's worth a look, with receipts. Every finding runs <span class="hlg">claim → evidence → BRICKLAYER'S READ → action</span>,
+      where the AI reasons about <em>and critiques</em> its own number before it hands it to you.
+    </p>
+    <div class="row" style="margin-top:26px">
+      <span class="pill green"><span class="dot"></span> Per-lens landing, not a side tab</span>
+      <span class="pill">Opinion / critique layer — the dashboard is the browse layer</span>
+      <span class="pill info">Analyst with receipts</span>
+    </div>
+    <p class="small muted" style="margin-top:26px;max-width:74ch">
+      <span class="anno">How to read this</span> — this is a Voltagent-styled <em>concept-documentation</em> page, not the shipping UI.
+      Charts are schematic hand-drawn SVG; numbers are Ed's real POC figures ($6.5B book / 3,935 appraisals). Green
+      <span class="note-inline" style="color:var(--primary-soft)">annotation notes</span> point at the pattern being proposed. Direction: <span class="mono">DIRECTION-v2-hubspot-anchored.md §6, §11</span>.
+    </p>
+  </div>
+</header>
+
+<!-- ============================ 3. PER-LENS NOTE ============================ -->
+<section class="band">
+  <div class="wrap">
+    <div class="section-kicker"><span class="n">03</span><div class="eyebrow" style="margin:0">The same book, two different reads</div></div>
+    <h2 style="max-width:24ch">One book of appraisals. The lens decides what stands out.</h2>
+    <p class="lead" style="margin-top:16px">
+      Ed's POC proved this live: the Lender / Credit-Officer Insights and the Portfolio-Manager Insights are
+      <span class="hl">genuinely different pages</span> off the same 3,935 appraisals — different findings, different focus charts,
+      different surprising links. The lens shapes what's surfaced and how it's read.
+    </p>
+
+    <div class="grid g2" style="margin-top:28px">
+      <div class="card lens-col">
+        <h4><span class="pill crit" style="padding:2px 9px">Lender · Credit Officer</span></h4>
+        <div class="tiny muted" style="margin:8px 0 6px">Eyebrow reads: <span class="mono">COLLATERAL &amp; CREDIT RISK</span> — reads the book for downside</div>
+        <div class="lens-item"><span class="lk">Stress</span><span>Direct-cap reprice: baseline <span class="num hl">$5.27B</span> → what breaks at rates <span class="num">+200 bps</span> / occupancy <span class="num">−10 pp</span>.</span></div>
+        <div class="lens-item"><span class="lk">Income</span><span>Income at risk: <span class="num hl">$5.7M</span> rolling in &lt;12 months (<span class="num">4.9%</span> share); most-exposed assets ranked.</span></div>
+        <div class="lens-item"><span class="lk">Concentration</span><span>Tenant &amp; sector concentration; lease-rollover exposure by year; thin comp support (<span class="num">3,486</span> zero-comp).</span></div>
+        <div class="lens-item"><span class="lk">Watchlist</span><span>Risk watchlist scored <span class="num">0–100</span> with a WHY column — cap below class avg, stale, low $/SF.</span></div>
+      </div>
+
+      <div class="card lens-col">
+        <h4><span class="pill info" style="padding:2px 9px">Appraisal Portfolio Manager</span></h4>
+        <div class="tiny muted" style="margin:8px 0 6px">Eyebrow reads: <span class="mono">APPRAISAL PORTFOLIO OVERVIEW</span> — reads the book for shape &amp; hygiene</div>
+        <div class="lens-item"><span class="lk">Concentration</span><span>Book concentrated in Residential — <span class="num hl">25%</span> / <span class="num">$1.55B</span> across <span class="num">2,708</span> appraisals.</span></div>
+        <div class="lens-item"><span class="lk">Staleness</span><span>Valuation staleness: <span class="num hl">1,233</span> appraisals aged past 24 months — <span class="num">$1.18B</span> of book value.</span></div>
+        <div class="lens-item"><span class="lk">Revaluation</span><span>Revaluation deltas — assets re-reviewed and moved (one <span class="num up" style="color:var(--up)">+84%</span> in value) flagged for a look.</span></div>
+        <div class="lens-item"><span class="lk">Data health</span><span>Extraction QA — <span class="num">15.0%</span> pass every check; <span class="num">3,267</span> missing coordinates, quarantined not averaged.</span></div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:22px">
+      <span class="k">Opinion model</span>
+      <span><b>fixed per lens now</b> → tuned per bank at onboarding → learns from dismissals (v2). What "good" looks like starts
+      as a curated per-lens view (a guardrail, since — in Ed's words — "an LLM is bad at deciding which two things belong together"),
+      then narrows to each bank's book at onboarding, then adapts as officers dismiss findings.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 4. THE INSIGHTS LANDING (HERO MOCK) ============================ -->
+<section class="band">
+  <div class="wrap">
+    <div class="section-kicker"><span class="n">04</span><div class="eyebrow" style="margin:0">The Insights landing — hero mock</div></div>
+    <h2 style="max-width:22ch">The surface, in our own pattern.</h2>
+    <p class="lead" style="margin-top:16px">
+      Three zones working together — an AI <b>TODAY</b> read, a scrollable list of <b>finding-cards</b> plus <b>surprising links</b>,
+      and a <b>focus panel</b> that swaps in when you select a card. We lean on Ed's mock for the <em>kinds</em> of insight; the layout is ours.
+    </p>
+
+    <!-- Portfolio-Manager lens header strip -->
+    <div class="card soft" style="margin-top:24px;padding:16px 20px">
+      <div class="row" style="justify-content:space-between">
+        <div class="stack g8">
+          <div class="row">
+            <span class="pill info" style="padding:2px 9px">Lens · Appraisal Portfolio Manager</span>
+            <span class="tiny muted">Looking at: <span class="hl">the whole book</span></span>
+          </div>
+          <div class="eyebrow" style="margin:0;color:var(--info)">Appraisal Portfolio Overview</div>
+        </div>
+        <div class="row">
+          <span class="pill">Role ▾</span>
+          <span class="pill">From — To · <span class="mono">Apply</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3-zone layout -->
+    <div class="grid" style="margin-top:16px;grid-template-columns:1.05fr 1.35fr;gap:16px">
+      <!-- LEFT COLUMN: zone (a) TODAY + zone (b) findings -->
+      <div class="stack g16">
+        <!-- (a) AI TODAY read -->
+        <div class="card green">
+          <div class="zone-label"><span class="b"></span> Zone A · AI "TODAY" read</div>
+          <div class="row" style="margin-bottom:10px"><span class="badge-verified">✦ Bricklayer</span><span class="tiny muted">Read all 3,935 appraisals through your lens</span></div>
+          <p style="font-size:14.5px;color:var(--ink);line-height:1.6">
+            Your book of <span class="hlg num">3,935</span> appraisals worth <span class="hlg num">$6.5B</span> is fundamentally sound but carries
+            <span class="hl">three material exposures</span>. It leans hard on Residential — <span class="num">25%</span> of value in one class.
+            Roughly a third of it is going stale (<span class="num">1,233</span> appraisals past 24 months). And the data itself needs a second look:
+            only <span class="num">15.0%</span> pass every extraction check. Nothing is critical since your last visit —
+            <span class="num">6</span> things stand out, plus <span class="num">6</span> connections I found.
+          </p>
+          <div class="prov">Source: Data Lake · 3,935 appraisals · read at 08:14</div>
+        </div>
+
+        <!-- (b) finding-cards -->
+        <div class="stack g12">
+          <div class="zone-label"><span class="b"></span> Zone B · Finding-cards <span class="tiny muted" style="letter-spacing:0;text-transform:none">— claim + evidence + type</span></div>
+
+          <div class="fcard active" aria-current="true">
+            <div class="head">
+              <span class="ficon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 6.9 4"/></svg>
+              </span>
+              <div>
+                <div class="fclaim">Your book is concentrated in Residential — 25% / $1.55B</div>
+                <div class="fev">Across 2,708 appraisals. Single-class exposure worth a diversification look. <span class="tag-type">· Concentration</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="fcard">
+            <div class="head">
+              <span class="ficon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/></svg>
+              </span>
+              <div>
+                <div class="fclaim">1,233 appraisals have aged past 24 months — $1.18B</div>
+                <div class="fev">Valuation staleness clusters in specific class × age buckets. <span class="tag-type">· Staleness</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="fcard">
+            <div class="head">
+              <span class="ficon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 18V6M4 18h16M8 18v-5M13 18V9M18 18v-8"/></svg>
+              </span>
+              <div>
+                <div class="fclaim">Price / SF depends on condition</div>
+                <div class="fev">A clean condition→price gradient — but one grade hides a suspicious outlier. <span class="tag-type">· Pricing driver</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="fcard">
+            <div class="head">
+              <span class="ficon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="8" r="3"/><path d="M4 19a5 5 0 0 1 10 0M17 6l2 2-2 2M15 8h4"/></svg>
+              </span>
+              <div>
+                <div class="fclaim">One appraiser is doing ~300% more work</div>
+                <div class="fev">30% of the book, passed without a second look — a concentration-of-judgement risk. <span class="tag-type">· Panel quality</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="fcard">
+            <div class="head">
+              <span class="ficon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l8 4v5c0 4-3.5 7-8 9-4.5-2-8-5-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg>
+              </span>
+              <div>
+                <div class="fclaim">Only 15.0% of appraisals pass every extraction check</div>
+                <div class="fev">3,267 missing coordinates — quarantined, not silently averaged into your numbers. <span class="tag-type">· Data health</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- surprising links -->
+        <div class="stack g12" style="margin-top:6px">
+          <div class="zone-label"><span class="b" style="background:var(--c3)"></span> Surprising links <span class="tiny muted" style="letter-spacing:0;text-transform:none">— LLM-discovered correlations you didn't chart</span></div>
+          <div class="surprise">
+            <div class="row" style="justify-content:space-between">
+              <span style="font-size:13.5px;color:var(--ink);font-weight:600">Value land-sales approach rises with vacancy</span>
+              <span class="pill" style="border-color:rgba(185,140,255,.4);color:var(--c3)">r ≈ 0.30</span>
+            </div>
+            <div class="tiny muted" style="margin-top:5px">Counter-intuitive — reads like a mechanical artifact of the approach, not a true signal. Bricklayer says so.</div>
+          </div>
+          <div class="surprise">
+            <div class="row" style="justify-content:space-between">
+              <span style="font-size:13.5px;color:var(--ink);font-weight:600">Cap-rate spread widens as appraisal age grows</span>
+              <span class="pill" style="border-color:rgba(185,140,255,.4);color:var(--c3)">r ≈ 0.41</span>
+            </div>
+            <div class="tiny muted" style="margin-top:5px">Older valuations drift from current-market cap rates — a staleness tell, cross-checked against the heatmap.</div>
+          </div>
+          <div class="surprise">
+            <div class="row" style="justify-content:space-between">
+              <span style="font-size:13.5px;color:var(--ink);font-weight:600">Price/SF dispersion tracks single-appraiser share</span>
+              <span class="pill" style="border-color:rgba(185,140,255,.4);color:var(--c3)">r ≈ 0.27</span>
+            </div>
+            <div class="tiny muted" style="margin-top:5px">Where one appraiser dominates, valuations spread wider — panel-diversity signal for the quality flag above.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: zone (c) focus panel -->
+      <div class="card emph" style="align-self:start;position:sticky;top:72px">
+        <div class="zone-label"><span class="b"></span> Zone C · Focus panel <span class="tiny muted" style="letter-spacing:0;text-transform:none">— the selected card, expanded</span></div>
+        <div class="row" style="justify-content:space-between;align-items:flex-start">
+          <div class="stack g8">
+            <h3 style="max-width:20ch">Your book is concentrated in Residential</h3>
+            <div class="row"><span class="pill green"><span class="dot"></span> 25% of value</span><span class="pill">$1.55B</span><span class="pill">2,708 appraisals</span></div>
+          </div>
+          <span class="badge-verified">✓ Verified</span>
+        </div>
+
+        <!-- donut chart -->
+        <div class="card soft" style="margin-top:16px;padding:18px">
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <svg viewBox="0 0 140 140" role="img" aria-label="Value by property class donut — Residential 25%, then Office, Retail, Industrial, Multifamily, Other">
+              <circle cx="70" cy="70" r="40" fill="none" stroke="var(--hairline-2)" stroke-width="18"/>
+              <!-- segments: circumference ~251.3; start at top -->
+              <g transform="rotate(-90 70 70)">
+                <circle cx="70" cy="70" r="40" fill="none" stroke="var(--primary)" stroke-width="18" stroke-dasharray="62.8 188.5"/>
+                <circle cx="70" cy="70" r="40" fill="none" stroke="var(--c2)" stroke-width="18" stroke-dasharray="48.3 203" stroke-dashoffset="-62.8"/>
+                <circle cx="70" cy="70" r="40" fill="none" stroke="var(--c3)" stroke-width="18" stroke-dasharray="45.2 206.1" stroke-dashoffset="-111.1"/>
+                <circle cx="70" cy="70" r="40" fill="none" stroke="var(--c4)" stroke-width="18" stroke-dasharray="37.7 213.6" stroke-dashoffset="-156.3"/>
+                <circle cx="70" cy="70" r="40" fill="none" stroke="var(--c6)" stroke-width="18" stroke-dasharray="32.7 218.6" stroke-dashoffset="-194"/>
+                <circle cx="70" cy="70" r="40" fill="none" stroke="var(--c8)" stroke-width="18" stroke-dasharray="24.6 226.7" stroke-dashoffset="-226.7"/>
+              </g>
+              <text x="70" y="66" text-anchor="middle" class="num" fill="var(--ink-strong)" font-size="20" font-weight="600">25%</text>
+              <text x="70" y="82" text-anchor="middle" fill="var(--mute)" font-size="9">Residential</text>
+            </svg>
+            <div class="stack g8" style="min-width:150px">
+              <div class="legend" style="flex-direction:column;gap:6px;margin:0">
+                <span><i style="background:var(--primary)"></i> Residential · <span class="num">$1.55B</span> · 25%</span>
+                <span><i style="background:var(--c2)"></i> Office · <span class="num">$1.25B</span> · 19%</span>
+                <span><i style="background:var(--c3)"></i> Retail · <span class="num">$1.17B</span> · 18%</span>
+                <span><i style="background:var(--c4)"></i> Industrial · <span class="num">$0.98B</span> · 15%</span>
+                <span><i style="background:var(--c6)"></i> Multifamily · <span class="num">$0.85B</span> · 13%</span>
+                <span><i style="background:var(--c8)"></i> Other · <span class="num">$0.64B</span> · 10%</span>
+              </div>
+            </div>
+          </div>
+          <div class="prov">Source: Data Lake · value by property class</div>
+        </div>
+
+        <!-- BRICKLAYER'S READ populated -->
+        <div class="read" style="margin-top:16px">
+          <div class="rhead">
+            <span class="rlabel">◆ Bricklayer's read</span>
+            <span class="tiny muted">reasoning over the numbers — and challenging them</span>
+          </div>
+          <p class="crit">
+            A quarter of collateral value in a single class is real concentration, but before you act on it —
+            <span class="hl">two of the six classes lean on stale valuations</span> (see the staleness finding), so this mix is
+            partly an artifact of <em>when</em> things were last appraised, not just <em>what</em> you hold. I'd re-run the concentration
+            view on appraisals under 24 months old before taking it to committee; the true Residential share is likely
+            <span class="hlg">a few points lower</span> once stale Office and Retail are refreshed.
+          </p>
+        </div>
+
+        <!-- DIG DEEPER + Ask -->
+        <div class="stack g12" style="margin-top:16px">
+          <div class="anno">Dig deeper</div>
+          <div class="chip-row">
+            <span class="chip"><span class="q">↳</span> Concentration on fresh appraisals only</span>
+            <span class="chip"><span class="q">↳</span> Residential by geography</span>
+            <span class="chip"><span class="q">↳</span> Compare to peer-bank benchmark</span>
+          </div>
+          <div class="field"><span class="mono">Ask a follow-up…</span><span class="cursor" aria-hidden="true"></span></div>
+        </div>
+
+        <div class="mcp-actions" style="margin-top:16px">
+          <button class="btn btn-outline">⤢ Open full board</button>
+          <button class="btn btn-ghost">📌 Pin to dashboard</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:22px">
+      <span class="k">Not the dashboard</span>
+      <span>The donut here is <b>evidence for an argument</b>, not a browsable tile. The dashboard's "Value by property class" tile
+      lets you explore; this focus panel exists only to back the claim and get critiqued. Same data, different job.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 5. FINDING-CARD ANATOMY ============================ -->
+<section class="band">
+  <div class="wrap">
+    <div class="section-kicker"><span class="n">05</span><div class="eyebrow" style="margin:0">Finding-card anatomy</div></div>
+    <h2 style="max-width:24ch">Four parts, always in the same order.</h2>
+    <p class="lead" style="margin-top:16px">Every finding is the same shape so the eye learns it once: <span class="hlg">claim → evidence → AI read → action</span>. Here's one enlarged, with the parts labelled.</p>
+
+    <div class="grid" style="margin-top:24px;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start">
+      <!-- enlarged card -->
+      <div class="card emph green">
+        <div class="row" style="justify-content:space-between;align-items:flex-start">
+          <span class="tag-type">Staleness finding</span>
+          <div class="row"><span class="badge-verified">✓ Verified</span></div>
+        </div>
+
+        <!-- claim -->
+        <h3 style="margin-top:12px;max-width:26ch">1,233 appraisals have aged past 24 months — $1.18B</h3>
+
+        <!-- evidence -->
+        <p class="small muted" style="margin-top:10px">
+          <span class="anno">Evidence</span> &nbsp; Staleness concentrates in Office (&gt;48 mo) and Retail (&gt;36 mo).
+          The class × age heatmap shows the hot corner.
+        </p>
+        <div class="card soft" style="margin-top:12px;padding:12px">
+          <!-- mini heatmap -->
+          <div style="overflow-x:auto">
+            <div style="display:grid;grid-template-columns:70px repeat(5,1fr);gap:3px;min-width:340px;font-size:10px">
+              <span></span>
+              <span class="mute tiny" style="text-align:center;color:var(--mute)">&lt;12mo</span>
+              <span class="mute tiny" style="text-align:center;color:var(--mute)">12–24</span>
+              <span class="mute tiny" style="text-align:center;color:var(--mute)">24–48</span>
+              <span class="mute tiny" style="text-align:center;color:var(--mute)">48–96</span>
+              <span class="mute tiny" style="text-align:center;color:var(--mute)">&gt;96mo</span>
+              <!-- rows -->
+              <span class="mute tiny" style="color:var(--mute)">Residential</span>
+              <span style="height:22px;border-radius:3px;background:rgba(0,217,146,.55)"></span>
+              <span style="height:22px;border-radius:3px;background:rgba(0,217,146,.32)"></span>
+              <span style="height:22px;border-radius:3px;background:rgba(255,184,77,.30)"></span>
+              <span style="height:22px;border-radius:3px;background:rgba(255,93,93,.28)"></span>
+              <span style="height:22px;border-radius:3px;background:rgba(255,93,93,.18)"></span>
+              <span class="mute tiny" style="color:var(--mute)">Office</span>
+              <span style="height:22px;border-radius:3px;background:rgba(0,217,146,.30)"></span>
+              <span style="height:22px;border-radius:3px;background:rgba(255,184,77,.34)"></span>
+              <span style="height:22px;border-radius:3px;background:rgba(255,93,93,.45)"></span>
+              <span style="height:22px;border-radius:3px;background:rgba(255,93,93,.70);outline:1px solid var(--crit)"></span>
+              <span style="height:22px;border-radius:3px;background:rgba(255,93,93,.40)"></span>
+              <span class="mute tiny" style="color:var(--mute)">Retail</span>
+              <span style="height:22px;border-radius:3px;background:rgba(0,217,146,.28)"></span>
+              <span style="height:22px;border-radius:3px;background:rgba(255,184,77,.40)"></span>
+              <span style="height:22px;border-radius:3px;background:rgba(255,93,93,.55)"></span>
+              <span style="height:22px;border-radius:3px;background:rgba(255,93,93,.38)"></span>
+              <span style="height:22px;border-radius:3px;background:rgba(255,93,93,.22)"></span>
+            </div>
+          </div>
+          <div class="tiny muted" style="margin-top:8px">Click a cell to drill · green = fresh → red = stale</div>
+        </div>
+
+        <!-- AI read -->
+        <div class="read" style="margin-top:14px">
+          <div class="rhead"><span class="rlabel">◆ Bricklayer's read</span></div>
+          <p class="crit">The $1.18B headline overstates urgency — <span class="hl">$540M of it is Residential under 36 months</span>, which
+          re-appraises cheaply and rarely moves value. The genuinely exposed slice is the <span class="hlg">Office &gt;48-month corner ($310M)</span>,
+          where cap rates have moved most since. Prioritise that corner, not the raw count.</p>
+        </div>
+
+        <!-- action -->
+        <div class="mcp-actions">
+          <button class="btn btn-primary">Queue Office &gt;48mo for re-appraisal</button>
+          <button class="btn btn-ghost">Dismiss — not material</button>
+        </div>
+        <div class="prov">Source: Data Lake · valuation staleness (class × age)</div>
+      </div>
+
+      <!-- annotation notes -->
+      <div class="stack g16">
+        <div class="note"><span class="k">1 · Claim</span><span>A single, falsifiable headline with the number and the dollar impact. No hedging in the title — the hedging lives in the read.</span></div>
+        <div class="note"><span class="k">2 · Evidence</span><span>The smallest chart that proves the claim (here, the class × age heatmap). It's proof, not exploration — the dashboard is where you browse.</span></div>
+        <div class="note"><span class="k">3 · AI read</span><span><b>The differentiator.</b> Bricklayer critiques its own headline — narrows $1.18B down to the $310M that actually matters. Skeptical by default.</span></div>
+        <div class="note"><span class="k">4 · Action</span><span>A concrete next step (queue for re-appraisal) plus <b>Dismiss</b> — and dismissals are how the opinion model learns per bank (v2).</span></div>
+        <div class="note"><span class="k">✓ Verified + provenance</span><span>The badge means the numbers reconciled against the Data Lake; the mono provenance line names the exact source object. This is "receipts."</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 6. BRICKLAYER'S READ AS A COMPONENT ============================ -->
+<section class="band">
+  <div class="wrap">
+    <div class="section-kicker"><span class="n">06</span><div class="eyebrow" style="margin:0">BRICKLAYER'S READ — a first-class component</div></div>
+    <h2 style="max-width:26ch">The read-and-critique block, on its own.</h2>
+    <p class="lead" style="margin-top:16px">
+      It has two states: <b>loading</b> ("reasoning over the numbers…") and <b>populated</b>, where it challenges its own figure.
+      This is the same "Price/SF depends on condition" finding from the landing — watch it turn skeptical.
+    </p>
+
+    <div class="grid g2" style="margin-top:24px;align-items:start">
+      <!-- loading state -->
+      <div class="card">
+        <div class="row" style="justify-content:space-between"><span class="tag-type">State 1 · Loading</span><span class="pill">Price/SF by condition</span></div>
+        <!-- horizontal bar evidence -->
+        <div class="card soft" style="margin-top:14px;padding:16px">
+          <svg viewBox="0 0 320 150" role="img" aria-label="Price per SF by condition grade horizontal bars">
+            <g font-size="9" fill="var(--mute)">
+              <text x="4" y="24">Excellent</text><text x="4" y="52">Good</text>
+              <text x="4" y="80">Average</text><text x="4" y="108">Fair</text><text x="4" y="136">Poor</text>
+            </g>
+            <line x1="70" y1="8" x2="70" y2="144" stroke="var(--grid)"/>
+            <rect x="70" y="14" width="210" height="16" rx="2" fill="var(--c8)"/>
+            <rect x="70" y="42" width="168" height="16" rx="2" fill="var(--c8)"/>
+            <rect x="70" y="70" width="120" height="16" rx="2" fill="var(--c8)"/>
+            <rect x="70" y="98" width="78" height="16" rx="2" fill="var(--c8)"/>
+            <rect x="70" y="126" width="150" height="16" rx="2" fill="var(--crit)" opacity=".85"/>
+            <g font-size="9" fill="var(--body)" class="num">
+              <text x="286" y="26">$268</text><text x="244" y="54">$214</text>
+              <text x="196" y="82">$151</text><text x="154" y="110">$96</text>
+              <text x="226" y="138" fill="var(--crit)">$191 ⚠</text>
+            </g>
+          </svg>
+          <div class="prov">Source: Data Lake · price/SF by condition</div>
+        </div>
+        <div class="read" style="margin-top:14px">
+          <div class="rhead"><span class="rlabel">◆ Bricklayer's read</span><span class="tiny muted">Reasoning over the numbers…</span></div>
+          <div class="stack g8" style="margin-top:4px" aria-hidden="true">
+            <div class="sk" style="width:96%"></div>
+            <div class="sk" style="width:88%"></div>
+            <div class="sk" style="width:72%"></div>
+            <div class="sk" style="width:40%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- populated state -->
+      <div class="card green">
+        <div class="row" style="justify-content:space-between"><span class="tag-type">State 2 · Populated (critiquing)</span><span class="badge-verified">✓ Verified</span></div>
+        <div class="card soft" style="margin-top:14px;padding:16px">
+          <svg viewBox="0 0 320 150" role="img" aria-label="Price per SF by condition grade horizontal bars, Poor grade outlier highlighted">
+            <g font-size="9" fill="var(--mute)">
+              <text x="4" y="24">Excellent</text><text x="4" y="52">Good</text>
+              <text x="4" y="80">Average</text><text x="4" y="108">Fair</text><text x="4" y="136">Poor</text>
+            </g>
+            <line x1="70" y1="8" x2="70" y2="144" stroke="var(--grid)"/>
+            <rect x="70" y="14" width="210" height="16" rx="2" fill="var(--c8)"/>
+            <rect x="70" y="42" width="168" height="16" rx="2" fill="var(--c8)"/>
+            <rect x="70" y="70" width="120" height="16" rx="2" fill="var(--c8)"/>
+            <rect x="70" y="98" width="78" height="16" rx="2" fill="var(--c8)"/>
+            <rect x="70" y="126" width="150" height="16" rx="2" fill="none" stroke="var(--crit)" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <g font-size="9" fill="var(--body)" class="num">
+              <text x="286" y="26">$268</text><text x="244" y="54">$214</text>
+              <text x="196" y="82">$151</text><text x="154" y="110">$96</text>
+              <text x="226" y="138" fill="var(--crit)">$191 ⚠</text>
+            </g>
+          </svg>
+          <div class="prov">Source: Data Lake · price/SF by condition</div>
+        </div>
+        <div class="read" style="margin-top:14px">
+          <div class="rhead"><span class="rlabel">◆ Bricklayer's read</span></div>
+          <p class="crit">Condition drives price cleanly from Excellent ($268) down to Fair ($96) — <span class="hl">except "Poor" prices <em>above</em> Average</span>,
+          which is nonsensical. That $191 is <span class="hlg">almost certainly a definitional or data-entry artifact</span> — likely a handful of
+          mislabelled records — rather than a true condition-driven pricing signal. Verify those records or exclude them, then re-run the
+          regression; the real gradient is monotonic once the "Poor" bucket is cleaned.</p>
+          <div class="row" style="justify-content:space-between;margin-top:12px">
+            <span class="tiny muted">Was this read useful?</span>
+            <span class="thumbs"><button aria-label="Helpful">👍</button><button aria-label="Not helpful">👎</button></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:22px">
+      <span class="k">Why it matters</span>
+      <span>This read-and-critique behavior <b>IS "analyst with receipts"</b> — the sharpest differentiator vs HubSpot Breeze / CoStar.
+      Neither will tell you their own number is probably wrong. Bricklayer leads with the caveat.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 7. EXPLAIN-THIS PATTERN ============================ -->
+<section class="band">
+  <div class="wrap">
+    <div class="section-kicker"><span class="n">07</span><div class="eyebrow" style="margin:0">"Explain this" — right-click → reason</div></div>
+    <h2 style="max-width:26ch">Right-click a watchlist row, get the reasoning in chat.</h2>
+    <p class="lead" style="margin-top:16px">
+      One of Ed's clearest "this is what we want people to feel" moments. A context-scoped co-working invocation:
+      the row becomes a question, the agent reasons in the docked chat, then hands you into the property workspace.
+    </p>
+
+    <div class="grid g3 steps" style="margin-top:24px;align-items:start">
+      <!-- step 1 -->
+      <div class="card">
+        <div class="row" style="margin-bottom:12px"><span class="stepn">1</span><span class="anno">Right-click a Risk-watchlist row</span></div>
+        <div class="tablewrap">
+          <table class="data">
+            <thead><tr><th>Property</th><th>Score</th><th>Cap</th></tr></thead>
+            <tbody>
+              <tr><td>1033 E Lake Dr, Decatur</td><td class="num">62</td><td class="num">6.10%</td></tr>
+              <tr style="position:relative"><td style="color:var(--ink)">907 W. Fifth Ave, Gastonia</td><td class="num" style="color:var(--crit)">88</td><td class="num">7.50%</td></tr>
+              <tr><td>Good Samaritan Clinic</td><td class="num">54</td><td class="num">6.75%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="ctxmenu" style="margin-top:-4px;margin-left:20px;position:relative;z-index:2">
+          <div class="item on">🔍 Explain this property (Risk watchlist)</div>
+          <div class="sep"></div>
+          <div class="item dim">Open property workspace</div>
+          <div class="item dim">Pin row to dashboard</div>
+        </div>
+        <div class="tiny muted" style="margin-top:8px">Score 0–100 · WHY column drives the ranking</div>
+      </div>
+
+      <!-- step 2 -->
+      <div class="card">
+        <div class="row" style="margin-bottom:12px"><span class="stepn">2</span><span class="anno">Agent reasons in the co-working chat</span></div>
+        <div class="chat">
+          <div class="row" style="margin-bottom:10px"><span class="pill">Looking at: 907 W. Fifth Avenue</span></div>
+          <div class="msg" style="color:var(--ink)"><span class="badge-verified" style="margin-right:6px">✦</span>Bricklayer is building this…</div>
+          <div class="mcp">
+            <div class="tiny anno" style="margin-bottom:6px">Why it's flagged</div>
+            <p class="small" style="color:var(--body)">Its cap rate of <span class="hl num">7.50%</span> sits <span class="hlg">well below the class average</span> for its
+            segment, its price/SF (<span class="num">$140.81</span>) is low for the market, and the appraisal is <span class="hl num">49 months</span> stale —
+            three independent flags stacking into a high review-priority score.</p>
+            <div class="divider" style="margin:10px 0"></div>
+            <div class="grid g2" style="gap:8px">
+              <div class="kpi"><span class="v num">$560K</span><span class="l">Appraised value</span></div>
+              <div class="kpi"><span class="v num">$140.81</span><span class="l">Price / SF</span></div>
+              <div class="kpi"><span class="v num">7.50%</span><span class="l">Cap rate</span></div>
+              <div class="kpi"><span class="v num">49mo</span><span class="l">Appraisal age</span></div>
+            </div>
+            <div class="prov">Source: Data Lake · property · Gastonia, NC 28052</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- step 3 -->
+      <div class="card green">
+        <div class="row" style="margin-bottom:12px"><span class="stepn">3</span><span class="anno">Hand off to the property workspace</span></div>
+        <div class="stack g12">
+          <p class="small" style="color:var(--body)">The chat reasoning ends with a doorway, not a dead end. One click opens the full
+          individual-property workspace — valuation-approaches variance, cap-rate sensitivity, comparable sales with a CoV badge,
+          appraisal detail — every tile carrying its own provenance.</p>
+          <button class="btn btn-primary" style="width:100%;justify-content:center">→ Open property workspace</button>
+          <div class="divider"></div>
+          <div class="note" style="border-left-color:var(--info)"><span class="k" style="color:var(--info)">Pattern</span>
+            <span>Right-click context menu on a <b>tile / table row</b> is the entry point — a named, context-scoped
+            invocation of the docked co-working chat (DIRECTION-v2 §11).</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 8. INSIGHTS ≠ DASHBOARD ============================ -->
+<section class="band">
+  <div class="wrap">
+    <div class="section-kicker"><span class="n">08</span><div class="eyebrow" style="margin:0">Insights ≠ Dashboard</div></div>
+    <h2 style="max-width:28ch">The opinion layer, not another grid of charts.</h2>
+    <p class="lead" style="margin-top:16px">
+      This resolves the July-14 duplication concern head-on. Insights and the dashboard use the same data lake but do different jobs —
+      one argues, one browses.
+    </p>
+
+    <div class="grid g2" style="margin-top:24px;align-items:start">
+      <div class="card green">
+        <h4 style="color:var(--primary-soft)">Insights — the opinion / critique layer</h4>
+        <ul class="stack g8" style="margin:14px 0 0;padding-left:18px;color:var(--body);font-size:14px">
+          <li>Proactive — it <b>raises</b> what's worth a look; you don't go hunting.</li>
+          <li>Every item runs <span class="hlg">claim → evidence → AI read → action</span>.</li>
+          <li>Charts are <b>evidence</b> — the smallest proof of a claim, then critiqued.</li>
+          <li>Per-lens landing; it's where you <em>arrive</em>.</li>
+          <li>Skeptical: it challenges its own numbers.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 style="color:var(--info)">Dashboard — the browse layer</h4>
+        <ul class="stack g8" style="margin:14px 0 0;padding-left:18px;color:var(--body);font-size:14px">
+          <li>Reactive — a saved collection of report tiles you <b>explore</b>.</li>
+          <li>Tiles answer "what is X?"; you drill, filter, rearrange.</li>
+          <li>Charts are <b>interactive tiles</b> — the destination, not proof.</li>
+          <li>A default dashboard per lens; you <em>navigate to</em> it.</li>
+          <li>Neutral: it shows the number, it doesn't argue about it.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card soft" style="margin-top:16px">
+      <div class="row" style="justify-content:space-between;align-items:flex-start;gap:16px">
+        <div class="stack g8" style="max-width:52ch">
+          <h4>The bridge: a lighter <span class="hlg">pinned insight card</span> can sit atop a dashboard</h4>
+          <p class="small muted">For the in-context case, one finding — claim + read + a "See full insight →" link back to the Insights
+          landing — can pin to the top of a dashboard. It borrows the pattern without duplicating the tiles below it.</p>
+        </div>
+        <div class="card green" style="min-width:280px;padding:14px">
+          <div class="row" style="justify-content:space-between"><span class="tag-type">Pinned insight</span><span class="badge-verified">✓ Verified</span></div>
+          <p class="small" style="color:var(--ink);margin-top:8px;font-weight:600">1,233 appraisals aged past 24 months</p>
+          <p class="tiny muted" style="margin-top:4px">Real exposure is the Office &gt;48-mo corner ($310M), not the raw count.</p>
+          <a href="#" class="tiny" style="display:inline-block;margin-top:8px">See full insight →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:22px">
+      <span class="k">Resolves 7/14</span>
+      <span>Cody's concern was "Insights ≈ dashboard + AI text." The fix isn't to shrink Insights — it's to give it a
+      <b>different job</b>: opinion &amp; critique, never a copy of the browse grid. Both survive, neither duplicates the other.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 9. FOOTER ============================ -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="brand">
+      <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="2" y="13" width="9" height="4.2" rx="1" fill="currentColor"/>
+        <rect x="13" y="13" width="9" height="4.2" rx="1" fill="currentColor" opacity=".55"/>
+        <rect x="7.5" y="7.4" width="9" height="4.2" rx="1" fill="currentColor" opacity=".8"/>
+        <rect x="2" y="1.8" width="9" height="4.2" rx="1" fill="currentColor" opacity=".4"/>
+        <rect x="13" y="1.8" width="9" height="4.2" rx="1" fill="currentColor" opacity=".65"/>
+      </svg>
+      Bricklayer
+    </div>
+    <div class="small muted">
+      Brandcave · Bricklayer discovery · July 2026 · Direction: <span class="mono">DIRECTION-v2-hubspot-anchored.md</span>
+    </div>
+  </div>
+</footer>
