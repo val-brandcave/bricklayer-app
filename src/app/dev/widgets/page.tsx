@@ -1,5 +1,6 @@
 "use client";
 
+import { notFound } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/atoms";
@@ -56,6 +57,8 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
 }
 
 export default function WidgetGalleryPage() {
+  // Dev-only QA gallery — hidden (404) in production so it never ships on a demo link.
+  if (process.env.NODE_ENV === "production") notFound();
   const [loading, setLoading] = useState(false);
 
   const simulate = () => {

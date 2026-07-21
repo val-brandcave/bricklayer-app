@@ -1,5 +1,6 @@
 "use client";
 
+import { notFound } from "next/navigation";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Building2, Download, Filter, Plus, TrendingUp } from "lucide-react";
@@ -42,6 +43,8 @@ const row: React.CSSProperties = { display: "flex", flexWrap: "wrap", gap: "var(
 const SAMPLE_PROV = { label: "Derived from 3,935 appraisals", sourceRef: "Book snapshot", asOf: Date.now() };
 
 export default function ComponentGalleryPage() {
+  // Dev-only QA gallery — hidden (404) in production so it never ships on a demo link.
+  if (process.env.NODE_ENV === "production") notFound();
   const [loading, setLoading] = useState(false);
   const [chips, setChips] = useState(["Asset class", "Vintage", "Cap rate"]);
   const [active, setActive] = useState<string | null>("Asset class");
