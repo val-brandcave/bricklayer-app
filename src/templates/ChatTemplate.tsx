@@ -10,8 +10,9 @@ import { motion } from "framer-motion";
 import { fadeUp, staggerContainer, staggerItem } from "@/lib/motion";
 import type { Report } from "@/types";
 import type { UseChat } from "@/hooks/useChat";
+import { HEADER_H } from "@/lib/layout";
 
-const TOP = 60; // TopBar height
+const TOP = HEADER_H; // TopBar height
 const COLUMN = 780; // readable conversation column
 
 export interface ChatTemplateProps {

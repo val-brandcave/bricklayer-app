@@ -1,9 +1,11 @@
 "use client";
 
-import { ChevronRight, PanelLeftClose, PanelLeftOpen, Search } from "lucide-react";
+import { ChevronRight, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useUIStore } from "@/store/ui.store";
 import { ThemeToggle } from "@/components/atoms/ThemeToggle";
+import { SearchSpark } from "@/components/atoms/SearchSpark";
+import { HEADER_H } from "@/lib/layout";
 import { ProfileMenu } from "./ProfileMenu";
 
 const ROUTE_LABEL: Record<string, string> = {
@@ -16,11 +18,19 @@ const ROUTE_LABEL: Record<string, string> = {
 
 export function TopBar() {
   const setCommandOpen = useUIStore((s) => s.setCommandOpen);
-  const collapsed = useUIStore((s) => s.navCollapsed);
+  const navCollapsed = useUIStore((s) => s.navCollapsed);
   const toggleNav = useUIStore((s) => s.toggleNav);
+  const chatNavExpanded = useUIStore((s) => s.chatNavExpanded);
+  const toggleChatNav = useUIStore((s) => s.toggleChatNav);
   const crumb = useUIStore((s) => s.crumb);
   const pathname = usePathname();
   const base = ROUTE_LABEL[Object.keys(ROUTE_LABEL).find((r) => pathname.startsWith(r)) ?? ""] ?? "";
+
+  // On /chat the main nav is route-collapsed; the toggle flips the session
+  // override there instead of the persisted global preference.
+  const isChat = pathname.startsWith("/chat");
+  const collapsed = isChat ? !chatNavExpanded : navCollapsed;
+  const onToggleNav = isChat ? toggleChatNav : toggleNav;
 
   return (
     <header
@@ -31,7 +41,7 @@ export function TopBar() {
         display: "flex",
         alignItems: "center",
         gap: "var(--s-3)",
-        height: 60,
+        height: HEADER_H,
         padding: "0 var(--s-6)",
         background: "color-mix(in srgb, var(--surface) 86%, transparent)",
         backdropFilter: "saturate(1.4) blur(10px)",
@@ -41,7 +51,7 @@ export function TopBar() {
       {/* collapse toggle — plain icon button, sits against the rail */}
       <button
         type="button"
-        onClick={toggleNav}
+        onClick={onToggleNav}
         aria-label={collapsed ? "Expand navigation" : "Collapse navigation"}
         aria-pressed={collapsed}
         title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -97,45 +107,42 @@ export function TopBar() {
       {/* everything else pushed to the right */}
       <span style={{ flex: 1 }} />
 
+      {/* compact search affordance — reads as a button, not an input; opens the
+          command palette (⌘K). The sparkle marks it as AI-aware. */}
       <button
         type="button"
         onClick={() => setCommandOpen(true)}
-        aria-label="Search"
+        aria-label="Search or ask Bricklayer"
+        title="Search  ·  ⌘K"
         style={{
-          display: "flex",
+          display: "inline-flex",
           alignItems: "center",
-          gap: 10,
-          width: "min(360px, 34vw)",
-          height: 38,
-          padding: "0 12px",
-          borderRadius: "var(--r-md)",
+          gap: 9,
+          height: 34,
+          padding: "0 13px 0 12px",
+          borderRadius: "var(--r-pill)",
           border: "1px solid var(--hairline)",
           background: "var(--surface-2)",
           color: "var(--muted)",
           cursor: "pointer",
           font: "inherit",
           fontSize: 13.5,
-          textAlign: "left",
+          fontWeight: 500,
+          transition: "background var(--dur), color var(--dur), border-color var(--dur)",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "var(--surface-3)";
+          e.currentTarget.style.color = "var(--ink)";
+          e.currentTarget.style.borderColor = "color-mix(in srgb, var(--primary) 32%, var(--hairline))";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "var(--surface-2)";
+          e.currentTarget.style.color = "var(--muted)";
+          e.currentTarget.style.borderColor = "var(--hairline)";
         }}
       >
-        <Search size={16} style={{ flexShrink: 0 }} />
-        <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          Search reports, properties, dashboards…
-        </span>
-        <kbd
-          style={{
-            fontSize: 11,
-            fontWeight: 600,
-            color: "var(--muted)",
-            background: "var(--surface)",
-            border: "1px solid var(--hairline)",
-            borderRadius: "var(--r-xs)",
-            padding: "2px 6px",
-            flexShrink: 0,
-          }}
-        >
-          ⌘K
-        </kbd>
+        <SearchSpark size={16} />
+        <span>Search</span>
       </button>
 
       <ThemeToggle />

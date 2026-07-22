@@ -15,8 +15,9 @@ import { useUIStore } from "@/store/ui.store";
 import { useChat } from "@/hooks/useChat";
 import { useChatActions } from "@/hooks/useChatActions";
 import { EASE } from "@/lib/motion";
+import { HEADER_H } from "@/lib/layout";
 
-const TOP = 60; // TopBar height — the dock is inset directly beneath it
+const TOP = HEADER_H; // TopBar height — the dock is inset directly beneath it
 const WIDTH = 400;
 
 /* Right-docked co-working assistant. Inset beneath the top bar so the global
@@ -34,6 +35,7 @@ export function CoWorkingChat() {
   const { lens, editing, openEdit, closeEdit, toast, flash, saveReport, forkReport } = useChatActions();
 
   const [threadsOpen, setThreadsOpen] = useState(false);
+  const [promoting, setPromoting] = useState(false);
 
   const onExplainCta = (e: import("@/lib/explain").Explanation) => {
     if (e.ctaAction === "workspace") { close(); router.push("/properties"); }
@@ -41,9 +43,14 @@ export function CoWorkingChat() {
     else flash("Opening the report builder…");
   };
 
+  /* Promote to the full page. The thread carries over (both surfaces share the
+     chat store), so you land ON the live conversation — never the empty hero.
+     `promoting` swaps the dock's exit for a quick fade instead of a width
+     collapse, so it reads as the same chat opening up, not closing + relaunching. */
   const promote = () => {
-    close();
+    setPromoting(true);
     router.push("/chat");
+    close();
   };
 
   const startNew = () => {
@@ -60,8 +67,8 @@ export function CoWorkingChat() {
             aria-label="Bricklayer co-working assistant"
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: WIDTH, opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
-            transition={{ duration: 0.28, ease: EASE.out }}
+            exit={promoting ? { opacity: 0 } : { width: 0, opacity: 0 }}
+            transition={{ duration: promoting ? 0.16 : 0.28, ease: EASE.out }}
             style={{
               flex: "none",
               alignSelf: "flex-start",
@@ -76,11 +83,11 @@ export function CoWorkingChat() {
             }}
           >
             {/* header */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 var(--s-3)", height: 52, flex: "none", borderBottom: "1px solid var(--hairline)", minWidth: WIDTH - 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 var(--s-3)", height: HEADER_H, flex: "none", borderBottom: "1px solid var(--hairline)", minWidth: WIDTH - 1 }}>
               <Tooltip label="Threads" side="bottom">
                 <button type="button" aria-label="Threads" onClick={() => setThreadsOpen(true)} style={iconBtn}><MenuIcon size={18} strokeWidth={2} /></button>
               </Tooltip>
-              <span style={{ display: "grid", placeItems: "center", width: 26, height: 26, borderRadius: "var(--r-md)", background: "var(--brand-gradient-action)", color: "#fff", flex: "none" }}>
+              <span style={{ display: "grid", placeItems: "center", width: 26, height: 26, borderRadius: "var(--r-md)", background: "var(--primary)", color: "#fff", flex: "none" }}>
                 <EmblemMark size={15} tone="current" />
               </span>
               <span style={{ fontWeight: 650, color: "var(--ink)", fontSize: 14 }}>Bricklayer</span>
@@ -134,8 +141,8 @@ export function CoWorkingChat() {
                     transition={{ duration: 0.26, ease: EASE.out }}
                     style={{ position: "absolute", top: 0, bottom: 0, left: 0, width: WIDTH - 40, background: "var(--surface)", borderRight: "1px solid var(--hairline)", boxShadow: "var(--shadow-lg)", zIndex: 6, display: "flex", flexDirection: "column" }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, height: 52, padding: "0 var(--s-3) 0 var(--s-4)", borderBottom: "1px solid var(--hairline)", flex: "none" }}>
-                      <span style={{ display: "grid", placeItems: "center", width: 26, height: 26, borderRadius: "var(--r-md)", background: "var(--brand-gradient-action)", color: "#fff" }}><EmblemMark size={15} tone="current" /></span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, height: HEADER_H, padding: "0 var(--s-3) 0 var(--s-4)", borderBottom: "1px solid var(--hairline)", flex: "none" }}>
+                      <span style={{ display: "grid", placeItems: "center", width: 26, height: 26, borderRadius: "var(--r-md)", background: "var(--primary)", color: "#fff" }}><EmblemMark size={15} tone="current" /></span>
                       <span style={{ fontWeight: 650, fontSize: 14, flex: 1 }}>Threads</span>
                       <Tooltip label="Hide" side="bottom">
                         <button type="button" aria-label="Hide threads" onClick={() => setThreadsOpen(false)} style={iconBtn}><PanelLeftClose size={17} strokeWidth={2} /></button>

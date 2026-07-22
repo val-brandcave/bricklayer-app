@@ -7,27 +7,28 @@ import { TopBar } from "./TopBar";
 import { CoWorkingChat } from "./CoWorkingChat";
 import { PageTransition } from "./PageTransition";
 import { SettingsModal } from "./SettingsModal";
+import { SearchModal } from "./SearchModal";
 import { ExplainLayer } from "./ExplainLayer";
-import { SummonButton } from "@/components/molecules/SummonButton";
 import { useUIStore } from "@/store/ui.store";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const chatOpen = useUIStore((s) => s.chatOpen);
-  const toggleChat = useUIStore((s) => s.toggleChat);
+  const setCommandOpen = useUIStore((s) => s.setCommandOpen);
   const pathname = usePathname();
   const isFullChat = pathname.startsWith("/chat");
 
-  // ⌘K / Ctrl-K summons the co-working assistant.
+  // ⌘K / Ctrl-K opens the search / command palette (the shortcut is a standard
+  // convention, so it stays unlabelled in the UI). The copilot has its own
+  // summon: the "Ask Bricklayer" pill in the nav.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        toggleChat();
+        setCommandOpen(!useUIStore.getState().commandOpen);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [toggleChat]);
+  }, [setCommandOpen]);
 
   return (
     <div style={{ display: "flex", minHeight: "100dvh", background: "var(--canvas)" }}>
@@ -49,11 +50,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <SettingsModal />
 
+      {/* Search / command palette — global, reachable via the top-bar button or ⌘K. */}
+      <SearchModal />
+
       {/* Global "Explain this" driver — select-to-explain + right-click, everywhere. */}
       {!isFullChat && <ExplainLayer />}
-
-      {/* Floating summon on every page except the full-page chat, and only when the dock is closed. */}
-      {!isFullChat && !chatOpen && <SummonButton variant="fab" />}
     </div>
   );
 }

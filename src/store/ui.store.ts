@@ -33,6 +33,13 @@ interface UIState {
   toggleNav: () => void;
   setNavCollapsed: (collapsed: boolean) => void;
 
+  // On /chat the main nav auto-collapses to icons (route-driven, so every entry
+  // into the full-page chat looks identical). This session-only flag lets the
+  // user manually re-expand it there without disturbing the persisted global
+  // navCollapsed preference. Resets on reload → /chat always starts collapsed.
+  chatNavExpanded: boolean;
+  toggleChatNav: () => void;
+
   // app settings modal
   settingsOpen: boolean;
   setSettingsOpen: (open: boolean) => void;
@@ -116,6 +123,9 @@ export const useUIStore = create<UIState>((set, get) => ({
     persistNavCollapsed(navCollapsed);
     set({ navCollapsed });
   },
+
+  chatNavExpanded: false,
+  toggleChatNav: () => set((s) => ({ chatNavExpanded: !s.chatNavExpanded })),
 
   settingsOpen: false,
   setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
