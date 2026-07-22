@@ -1,0 +1,540 @@
+<title>Bricklayer — Copilot UX Recommendations</title>
+<style>
+:root{
+  --canvas:#101010; --canvas-soft:#1a1a1a; --canvas-2:#141414; --lift:#17181b;
+  --hairline:#3d3a39; --hairline-2:#2a2827;
+  --primary:#00d992; --primary-soft:#2fd6a1; --on-primary:#101010;
+  --ink-strong:#ffffff; --ink:#f2f2f2; --body:#bdbdbd; --mute:#8b949e;
+  --up:#3fd07f; --down:#ff6b6b; --watch:#ffb84d; --info:#4ea8ff;
+  /* the ACTUAL app brand tokens, shown as swatches in §6 */
+  --app-primary:#653ed3; --app-grad:linear-gradient(120deg,#1420b9 0%,#5037cc 50%,#8b44e0 100%);
+  --app-grad-brand:linear-gradient(135deg,#1420b9 0%,#653ed3 55%,#b65cee 100%);
+  --font:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --r-sm:6px; --r-md:9px; --r-pill:9999px; --maxw:1080px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:
+    radial-gradient(1100px 620px at 82% -8%,rgba(0,217,146,.06),transparent 60%),
+    var(--canvas);
+  color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.62;
+  -webkit-font-smoothing:antialiased;font-feature-settings:"calt","rlig"}
+h1,h2,h3,h4{margin:0;font-weight:400;letter-spacing:-.022em;color:var(--ink-strong);text-wrap:balance}
+h1{font-size:clamp(32px,5vw,54px);line-height:1.03}
+h2{font-size:clamp(24px,3vw,32px);line-height:1.12}
+h3{font-size:20px;font-weight:600;line-height:1.25}
+h4{font-size:15px;font-weight:600;color:var(--ink)}
+p{margin:0}
+a{color:var(--primary-soft);text-decoration:none}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+.band{padding:52px 0;border-top:1px dashed rgba(90,90,90,.35)}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--primary-soft);margin-bottom:13px}
+.lead{color:var(--body);font-size:18px;line-height:1.6;max-width:72ch}
+.muted{color:var(--mute)} .small{font-size:14px;line-height:1.55}
+.kbd{display:inline-block;border:1px solid var(--hairline);border-bottom-width:2px;border-radius:5px;
+  padding:1px 6px;font-size:12px;color:var(--ink);background:var(--canvas-2);font-weight:600}
+code{background:var(--canvas-2);border:1px solid var(--hairline-2);border-radius:4px;padding:1px 6px;
+  font-family:var(--font);font-size:13px;color:var(--primary-soft);font-weight:500}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:50;background:rgba(16,16,16,.85);backdrop-filter:blur(9px);border-bottom:1px solid var(--hairline)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:56px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--ink-strong);font-size:15px}
+.brand .glyph{width:17px;height:17px;color:var(--primary)}
+.nav .tag{font-size:12px;color:var(--mute);border:1px solid var(--hairline);border-radius:var(--r-pill);padding:3px 11px}
+
+/* hero */
+.hero{padding:66px 0 42px}
+.pillrow{display:flex;flex-wrap:wrap;gap:7px;margin-top:20px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;border:1px solid var(--hairline);
+  border-radius:var(--r-pill);padding:3px 11px;color:var(--ink);background:var(--canvas)}
+.pill.green{border-color:rgba(0,217,146,.45);color:var(--primary-soft)}
+.pill.info{border-color:rgba(78,168,255,.5);color:var(--info)}
+.pill.watch{border-color:rgba(255,184,77,.5);color:var(--watch)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--primary)}
+
+/* cards / layout */
+.card{background:var(--canvas-soft);border:1px solid var(--hairline);border-radius:var(--r-md);padding:22px}
+.grid{display:grid;gap:15px}
+.g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:840px){.g2,.g3{grid-template-columns:1fr}}
+
+/* decision table */
+.tablewrap{overflow-x:auto;border:1px solid var(--hairline);border-radius:var(--r-md)}
+table.dec{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
+table.dec th{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--mute);text-align:left;
+  font-weight:600;padding:11px 15px;border-bottom:1px solid var(--hairline);background:var(--canvas-2)}
+table.dec td{padding:13px 15px;border-bottom:1px solid var(--hairline-2);color:var(--body);vertical-align:top}
+table.dec tr:last-child td{border-bottom:none}
+table.dec .q{color:var(--ink);font-weight:600;width:30%}
+table.dec .v{width:24%}
+.verdict{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px;
+  border-radius:var(--r-pill);padding:3px 10px;white-space:nowrap}
+.verdict.keep{color:var(--primary-soft);border:1px solid rgba(0,217,146,.4);background:rgba(0,217,146,.07)}
+.verdict.change{color:var(--watch);border:1px solid rgba(255,184,77,.4);background:rgba(255,184,77,.07)}
+.verdict.fix{color:var(--info);border:1px solid rgba(78,168,255,.4);background:rgba(78,168,255,.07)}
+
+/* section number */
+.qhead{display:flex;align-items:baseline;gap:14px;margin-bottom:6px}
+.qnum{font-size:13px;font-weight:700;color:var(--primary-soft);letter-spacing:.06em;flex:0 0 auto;
+  border:1px solid rgba(0,217,146,.35);border-radius:7px;padding:3px 9px}
+
+/* recommendation callout */
+.rec{display:flex;gap:14px;border:1px solid rgba(0,217,146,.4);background:rgba(0,217,146,.06);
+  border-radius:var(--r-md);padding:15px 18px;margin-top:20px}
+.rec .k{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--primary-soft);flex:0 0 96px;padding-top:2px}
+.rec p{color:var(--ink);font-size:14.5px;line-height:1.55}
+.rec b{color:var(--ink-strong)}
+.note{display:flex;gap:12px;border-left:2px solid var(--mute);background:var(--canvas-2);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;padding:11px 15px;font-size:13.5px;color:var(--body);margin-top:14px}
+.note.warn{border-left-color:var(--watch)}
+.note .k{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;flex:0 0 auto;color:var(--mute)}
+.note.warn .k{color:var(--watch)}
+.factline{font-size:13px;color:var(--mute);margin-top:12px}
+.factline b{color:var(--body);font-weight:600}
+ul.tick{margin:12px 0 0;padding-left:0;list-style:none}
+ul.tick li{position:relative;padding-left:22px;margin-bottom:8px;font-size:14.5px;color:var(--body);line-height:1.5}
+ul.tick li::before{content:"";position:absolute;left:0;top:8px;width:7px;height:7px;border-radius:2px;background:var(--primary)}
+ul.tick li b{color:var(--ink-strong)}
+ul.x li::before{background:var(--down)} ul.x li{color:var(--body)}
+
+/* ---- schematic mockups (the "pattern diagrams") ---- */
+.diagcap{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:10px;color:var(--mute)}
+.diagcap.good{color:var(--primary-soft)} .diagcap.bad{color:var(--down)}
+.win{border:1px solid var(--hairline);border-radius:var(--r-sm);overflow:hidden;background:var(--canvas-2);height:186px;display:flex;flex-direction:column}
+.win .top{height:26px;border-bottom:1px solid var(--hairline);display:flex;align-items:center;gap:6px;padding:0 9px;background:var(--canvas-soft);flex:0 0 auto}
+.win .top .s{flex:1;height:11px;border-radius:3px;background:rgba(255,255,255,.05)}
+.win .body{flex:1;display:flex;min-height:0}
+.reg{border-right:1px solid var(--hairline-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute);text-align:center;padding:6px 4px;font-weight:600}
+.reg:last-child{border-right:none}
+.reg.nav{flex:0 0 78px} .reg.navicon{flex:0 0 34px;background:rgba(255,255,255,.02)}
+.reg.threads{flex:0 0 84px;background:rgba(0,217,146,.05);color:var(--primary-soft);border-color:rgba(0,217,146,.25)}
+.reg.content{flex:1;background:rgba(255,255,255,.012)}
+.reg.dock{flex:0 0 86px;background:rgba(0,217,146,.07);color:var(--primary-soft);border-left:1px solid rgba(0,217,146,.3)}
+.reg .ico{width:15px;height:15px;border-radius:4px;background:rgba(255,255,255,.08);margin-bottom:1px}
+.reg .lab{opacity:.9}
+.reg .navrow{width:100%;display:flex;flex-direction:column;gap:5px;align-items:center}
+.reg .nl{width:80%;height:8px;border-radius:2px;background:rgba(255,255,255,.06)}
+.reg .nl.on{background:rgba(0,217,146,.4)}
+.marker{position:relative}
+.mk{position:absolute;font-size:9px;font-weight:700;color:var(--on-primary);background:var(--primary);border-radius:5px;padding:2px 6px;letter-spacing:.02em;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.fab{position:absolute;right:8px;bottom:8px;width:20px;height:20px;border-radius:50%;background:var(--app-grad);box-shadow:0 3px 9px rgba(0,0,0,.5)}
+.pillbtn{position:absolute;left:8px;bottom:8px;width:60px;height:15px;border-radius:8px;background:var(--app-grad)}
+.arrowrow{display:flex;align-items:center;justify-content:center;gap:16px;margin:6px 0}
+.bigarrow{color:var(--primary);font-size:26px;font-weight:300}
+
+/* header-alignment cross-section */
+.xsec{display:flex;gap:0;border:1px solid var(--hairline);border-radius:var(--r-sm);overflow:hidden;background:var(--canvas-2);font-size:11px}
+.xsec .col{flex:1;border-right:1px solid var(--hairline-2)}
+.xsec .col:last-child{border-right:none}
+.xsec .hd{border-bottom:2px solid var(--primary);display:flex;align-items:center;justify-content:center;color:var(--ink);font-weight:600;letter-spacing:.03em;background:var(--canvas-soft)}
+.xsec .hd.bad{border-bottom-color:var(--down)}
+.xsec .lbl{text-align:center;padding:8px 4px;color:var(--mute);font-size:10.5px}
+.xsec .lbl .n{color:var(--ink-strong);font-weight:700;font-variant-numeric:tabular-nums}
+.xsec .lbl .n.bad{color:var(--down)}
+
+/* swatches */
+.sw{display:flex;flex-direction:column;gap:9px}
+.swatch{height:58px;border-radius:var(--r-sm);border:1px solid var(--hairline-2);display:flex;align-items:flex-end;padding:8px 10px}
+.swatch .emb{width:22px;height:22px;border-radius:5px;display:grid;place-items:center;margin-right:auto}
+.emb svg{width:13px;height:13px;color:#fff}
+.swrole{font-size:12.5px;color:var(--body)} .swrole b{color:var(--ink-strong)}
+.swname{font-size:11px;color:var(--mute);margin-top:2px}
+
+.footer{padding:38px 0;border-top:1px solid var(--hairline);color:var(--mute);font-size:13px}
+.footer .wrap{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between}
+</style>
+
+<!-- glyph def reused inline -->
+<svg width="0" height="0" style="position:absolute"><defs><g id="emb">
+  <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" fill="currentColor"/></g></defs></svg>
+
+<nav class="nav"><div class="wrap">
+  <div class="brand"><svg class="glyph" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" fill="currentColor"/></svg>Bricklayer</div>
+  <span class="tag">Copilot UX · recommendations · Jul 2026</span>
+</div></nav>
+
+<header class="wrap hero">
+  <div class="eyebrow">Design recommendation · advisory</div>
+  <h1>The copilot, made coherent</h1>
+  <p class="lead" style="margin-top:20px">Six questions about how the AI copilot is summoned, expanded, and framed — answered
+    with a recommendation on each, grounded in the current code. <b style="color:var(--ink)">Nothing here is built yet.</b>
+    This is a decision doc: read the verdicts, tell me which you want, and I'll implement.</p>
+  <div class="pillrow">
+    <span class="pill green"><span class="dot"></span> One agent · two surfaces</span>
+    <span class="pill">Honors Direction v2 (D2, D5)</span>
+    <span class="pill info">6 decisions + 1 bug found</span>
+  </div>
+  <p class="small muted" style="margin-top:22px;max-width:74ch">
+    <b style="color:var(--primary-soft)">The doctrine we're keeping</b> — the copilot is one agent in two frames: a
+    <b style="color:var(--ink)">right-docked co-working rail</b> (quick, page-aware, summonable) and a
+    <b style="color:var(--ink)">full-page threaded chat</b> (book-wide, browsable history). Both are ratified in
+    <code>DIRECTION-v2</code>. Every recommendation below protects that split while removing the friction between the two.</p>
+</header>
+
+<!-- ============ TL;DR ============ -->
+<section class="band"><div class="wrap">
+  <div class="eyebrow">The short version</div>
+  <h2>Six decisions at a glance</h2>
+  <div class="tablewrap" style="margin-top:24px">
+    <table class="dec">
+      <thead><tr><th class="q">Your question</th><th class="v">Verdict</th><th>In one line</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="q">Two ways to open the rail (nav pill + floating button) — need both?</td>
+          <td class="v"><span class="verdict change">Consolidate → 1</span></td>
+          <td>Keep <b>one</b> persistent, labelled trigger; drop the second. And drop the stray <span class="kbd">⌘K</span> badge — it's a standard shortcut now, no need to print it.</td>
+        </tr>
+        <tr>
+          <td class="q">"Expand full page" closes the rail &amp; navigates away — feels weird.</td>
+          <td class="v"><span class="verdict fix">Fix continuity</span></td>
+          <td>Keep the promote action, but make it feel like <b>the same conversation opening up</b> — animate + land on the live thread, never the empty state.</td>
+        </tr>
+        <tr>
+          <td class="q">Do we even need the Chat item in the side nav?</td>
+          <td class="v"><span class="verdict keep">Keep it</span></td>
+          <td>Yes — it's the home for thread history &amp; book-wide work. The fix is making both entrances land in the <b>same</b> place.</td>
+        </tr>
+        <tr>
+          <td class="q">Two side navs at once — standard? Auto-collapse the main one?</td>
+          <td class="v"><span class="verdict change">Auto-collapse</span></td>
+          <td>Two rails is fine (the 2nd is a <b>list pane</b>). Collapse the main nav to icons on <code>/chat</code> — <b>route-driven</b>, so it's identical no matter how you arrived.</td>
+        </tr>
+        <tr>
+          <td class="q">Rail header shorter than the page headers — misaligned. Fix?</td>
+          <td class="v"><span class="verdict fix">Yes, fix</span></td>
+          <td>One offender: the dock header is <b>52px</b> vs everything else at <b>60px</b>. One-line fix, real polish. Token it so it can't drift again.</td>
+        </tr>
+        <tr>
+          <td class="q">Is the copilot's logo colour right? Different treatments?</td>
+          <td class="v"><span class="verdict change">Right hue, fix hierarchy</span></td>
+          <td>Colour is correct (it's the brand — don't invent a copilot colour). Stop repeating the gradient 5× per screen; reserve it for <b>the summon + the hero</b>.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note"><span class="k">Legend</span><div>
+    <span class="verdict keep" style="font-size:12px">Keep</span> leave as designed &nbsp;·&nbsp;
+    <span class="verdict change" style="font-size:12px">Change</span> alter the pattern &nbsp;·&nbsp;
+    <span class="verdict fix" style="font-size:12px">Fix</span> small, high-value polish.
+  </div></div>
+</div></section>
+
+<!-- ============ CURRENT STATE ============ -->
+<section class="band"><div class="wrap">
+  <div class="eyebrow">Where we are today</div>
+  <h2>What's on screen right now</h2>
+  <p class="lead" style="margin-top:14px">Before the fixes — the copilot has grown three summon paths, two of them redundant, and the
+    two surfaces don't hand off cleanly.</p>
+  <div class="grid g3" style="margin-top:24px">
+    <div class="card">
+      <div class="diagcap bad">On any normal page</div>
+      <div class="win marker">
+        <div class="top"><div class="s"></div></div>
+        <div class="body">
+          <div class="reg nav"><div class="navrow"><div class="nl on"></div><div class="nl"></div><div class="nl"></div><div class="nl"></div><div class="nl"></div></div></div>
+          <div class="reg content"><span class="lab">page</span></div>
+          <div class="reg dock"><div class="ico"></div><span class="lab">copilot dock</span></div>
+        </div>
+        <div class="pillbtn" title="Ask Bricklayer pill"></div>
+        <div class="fab" title="floating button"></div>
+      </div>
+      <p class="factline"><b>Two triggers</b> for one rail — the "Ask Bricklayer" pill (bottom-left) <i>and</i> the floating
+        button (bottom-right), which also overlaps data tiles.</p>
+    </div>
+    <div class="card">
+      <div class="diagcap bad">Clicking "expand"</div>
+      <div class="arrowrow" style="height:calc(186px - 0px)">
+        <div class="win" style="width:70px;height:120px"><div class="top" style="height:18px"></div><div class="body"><div class="reg dock" style="flex:1">dock</div></div></div>
+        <div class="bigarrow">→</div>
+        <div class="win" style="flex:1;height:120px"><div class="top" style="height:18px"></div><div class="body"><div class="reg content">empty "how can I help?"</div></div></div>
+      </div>
+      <p class="factline">Handler is <code>close(); router.push('/chat')</code> — the rail <b>unmounts</b> and the route
+        changes. A hard cut, and you can land on the empty hero.</p>
+    </div>
+    <div class="card">
+      <div class="diagcap bad">On <code>/chat</code></div>
+      <div class="win">
+        <div class="top"><div class="s"></div></div>
+        <div class="body">
+          <div class="reg nav"><div class="navrow"><div class="nl"></div><div class="nl"></div><div class="nl"></div><div class="nl"></div><div class="nl on"></div></div></div>
+          <div class="reg threads"><div class="ico"></div><span class="lab">threads</span></div>
+          <div class="reg content"><span class="lab">conversation</span></div>
+        </div>
+      </div>
+      <p class="factline"><b>Two full left rails</b> — the main app nav stays expanded next to the chat-threads rail. The main
+        nav doesn't step aside.</p>
+    </div>
+  </div>
+  <div class="note warn"><span class="k">Bug found</span><div>The <span class="kbd">⌘K</span> story is broken today: the search
+    field shows a <span class="kbd">⌘K</span> hint and flips a <code>commandOpen</code> flag that <b>nothing renders</b>
+    (there is no command palette), while the <i>real</i> <span class="kbd">⌘K</span> handler opens the copilot. So the same
+    shortcut is advertised for two different, one non-existent, features. <b style="color:var(--ink)">The clean fix (your call):
+    remove the visible <span class="kbd">⌘K</span> badge entirely.</b> It's a standard shortcut users already know — it can
+    quietly open the copilot without being printed anywhere. No badge, no false promise. Folded into decision #1.</div></div>
+</div></section>
+
+<!-- ============ Q1 ============ -->
+<section class="band"><div class="wrap">
+  <div class="qhead"><span class="qnum">01</span><h2>How many ways to summon the rail?</h2></div>
+  <p class="lead">Right now: a labelled pill in the nav footer, a floating button bottom-right, <i>and</i> <span class="kbd">⌘K</span> —
+    all calling the same <code>toggleChat()</code>. Three doors to one room.</p>
+
+  <div class="grid g2" style="margin-top:22px;align-items:start">
+    <div class="card">
+      <h4>The standard</h4>
+      <p class="small muted" style="margin-top:8px">Products with a docked assistant give it <b style="color:var(--body)">one
+        persistent visual trigger</b> plus a keyboard shortcut — never two competing buttons. A floating action button is the
+        norm for chat <i>widgets</i> (Intercom, Drift), but in a dense analytics tool it floats <i>over your data</i> — in the
+        screenshots it's sitting on the risk-watchlist score.</p>
+      <ul class="tick x">
+        <li>Two persistent buttons → "which one do I press?" ambiguity.</li>
+        <li>The FAB occludes tiles; the pill is labelled &amp; never covers content.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="diagcap good">Recommended</div>
+      <div class="win marker">
+        <div class="top"><div class="s"></div></div>
+        <div class="body">
+          <div class="reg nav"><div class="navrow"><div class="nl on"></div><div class="nl"></div><div class="nl"></div><div class="nl"></div></div></div>
+          <div class="reg content"><span class="lab">page — unobstructed</span></div>
+          <div class="reg dock"><div class="ico"></div><span class="lab">dock</span></div>
+        </div>
+        <div class="pillbtn" style="background:var(--app-grad)"></div>
+      </div>
+      <p class="factline">One labelled <b>"Ask Bricklayer"</b> pill + <span class="kbd">⌘K</span>. Nothing floats over data.</p>
+    </div>
+  </div>
+
+  <div class="rec"><span class="k">Recommend</span><div><p>
+    Keep <b>one persistent trigger</b>: the labelled <b>"Ask Bricklayer" pill</b> in the nav (it's discoverable, on-brand, and
+    never covers a chart). <b>Remove the floating button.</b> Keep <span class="kbd">⌘K</span> working as the <b>invisible</b>
+    power path — it opens the copilot — but <b>don't print the shortcut in the UI</b>. It's a standard convention users already
+    know (Cursor, Linear, Raycast), so a badge just adds chrome. Removing the stray <span class="kbd">⌘K</span> hint on the
+    search field also disposes of the inconsistency above in one move: no visible claim, no false promise to reconcile.</p>
+    <p style="margin-top:8px" class="muted">If you love the floating button instead, the inverse is fine — keep the FAB, drop
+    the pill — but then move it so it never overlaps tile content. The rule is <b>one</b>, not the specific one.</p>
+  </div></div>
+</div></section>
+
+<!-- ============ Q2 ============ -->
+<section class="band"><div class="wrap">
+  <div class="qhead"><span class="qnum">02</span><h2>"Expand to full page" shouldn't feel like leaving</h2></div>
+  <p class="lead">The instinct is right — it feels weird because the app does two jarring things at once: the rail
+    <b style="color:var(--ink)">disappears</b>, and the whole app <b style="color:var(--ink)">navigates</b>. Your brain reads
+    that as "I lost my chat," even though the thread technically carries over in state.</p>
+
+  <div class="card" style="margin-top:22px">
+    <div class="diagcap good">The feel we want — one conversation, opening up</div>
+    <div class="arrowrow">
+      <div class="win" style="width:110px"><div class="top"></div><div class="body"><div class="reg content"><span class="lab">page</span></div><div class="reg dock" style="flex:0 0 40px">dock</div></div></div>
+      <div class="bigarrow">→</div>
+      <div class="win" style="width:160px"><div class="top"></div><div class="body"><div class="reg content"><span class="lab">page</span></div><div class="reg dock" style="flex:0 0 90px">widening…</div></div></div>
+      <div class="bigarrow">→</div>
+      <div class="win" style="flex:1"><div class="top"></div><div class="body"><div class="reg navicon"></div><div class="reg threads">threads</div><div class="reg content"><span class="lab">same thread, full width</span></div></div></div>
+    </div>
+  </div>
+
+  <div class="rec"><span class="k">Recommend</span><div><p>
+    Keep the promote action (it's a ratified capability), but fix the transition:</p>
+    <ul class="tick" style="margin-top:10px">
+      <li><b>Land on the live thread, never the empty hero.</b> The single biggest cause of the "did I lose it?" feeling.
+        Guarantee the full page opens <i>on</i> the conversation you were just in.</li>
+      <li><b>Animate the hand-off.</b> Widen the rail into the full-page layout (or a quick cross-fade) so it reads as growth,
+        not a close-and-relaunch. No flash of empty white between.</li>
+      <li><b>Keep the composer's draft &amp; scroll position.</b> If they'd half-typed a question, it should survive the jump.</li>
+    </ul>
+    <p style="margin-top:10px" class="muted">Net: "expand" becomes "give me more room for <i>this</i>," which is exactly the
+      mental model of the two-surface doctrine.</p>
+  </div></div>
+</div></section>
+
+<!-- ============ Q3 ============ -->
+<section class="band"><div class="wrap">
+  <div class="qhead"><span class="qnum">03</span><h2>Does Chat belong in the side nav?</h2></div>
+  <p class="lead">Yes — but the reason the question comes up is real. Today the two entrances feel like duplicates because they
+    behave differently: the nav lands you on a fresh empty page, "expand" promotes a thread. Same destination, two personalities.</p>
+
+  <div class="grid g2" style="margin-top:22px">
+    <div class="card">
+      <h4>Why keep it</h4>
+      <ul class="tick" style="margin-top:6px">
+        <li>Thread <b>history</b> needs a browsable home — you can't get "my past analyses" from a transient rail.</li>
+        <li>It's the surface for <b>long, book-wide work</b> where the 400px rail is too cramped.</li>
+        <li>It's <b>ratified</b> (Direction v2, D2) — full-page chat is a first-class destination.</li>
+        <li>It matches every AI product's mental model (ChatGPT/Claude): a place chat <i>lives</i>, plus an assistant that
+          <i>visits</i> other pages.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>The two jobs, named</h4>
+      <p class="small" style="margin-top:6px;color:var(--body)"><b style="color:var(--ink-strong)">The rail</b> — quick, in-context,
+        "answer about <i>this</i> page." Summoned, disposable, 400px.</p>
+      <p class="small" style="margin-top:10px;color:var(--body)"><b style="color:var(--ink-strong)">The page</b> — deliberate,
+        book-wide, threaded, with history. A destination you go to.</p>
+      <p class="small muted" style="margin-top:10px">If a user can articulate this split, the nav item stops feeling redundant.
+        Right now the product doesn't tell them.</p>
+    </div>
+  </div>
+
+  <div class="rec"><span class="k">Recommend</span><div><p>
+    <b>Keep the Chat destination.</b> Resolve the redundancy not by deleting it, but by making the two entrances <b>consistent</b>:
+    both land in the identical full-page layout (decision #4), and the nav entry opens your <b>most-recent thread</b> (or a clear
+    "new/recent" split) rather than always dumping you on the empty hero. The nav item is the front door; "expand" is the same
+    room reached from inside the rail.</p>
+  </div></div>
+</div></section>
+
+<!-- ============ Q4 ============ -->
+<section class="band"><div class="wrap">
+  <div class="qhead"><span class="qnum">04</span><h2>Two side navs — and should the main one step aside?</h2></div>
+  <p class="lead">This is the crux. Yes, two rails is a legitimate, common pattern — <b style="color:var(--ink)">when the second one
+    is a list pane, not a second global menu</b>. Gmail (app rail + folders), Slack (workspaces + channels), Linear (nav + issue
+    list), and ChatGPT-in-a-shell all do exactly this. Your threads rail is a list pane, so the pattern is sound.</p>
+  <p class="lead" style="margin-top:12px">The problem isn't <i>two rails</i> — it's that both are at <b>full width</b>, so the
+    main nav's labels compete with the thread list for the same job (navigation) and eat the horizontal room.</p>
+
+  <div class="grid g2" style="margin-top:24px">
+    <div class="card">
+      <div class="diagcap bad">Today — two full menus</div>
+      <div class="win">
+        <div class="top"><div class="s"></div></div>
+        <div class="body">
+          <div class="reg nav"><div class="navrow"><div class="nl"></div><div class="nl"></div><div class="nl"></div><div class="nl"></div><div class="nl on"></div></div></div>
+          <div class="reg threads"><div class="ico"></div><span class="lab">threads</span></div>
+          <div class="reg content"><span class="lab">conversation</span></div>
+        </div>
+      </div>
+      <p class="factline">Main nav (labels) + threads rail — two things asking "where do you want to go?"</p>
+    </div>
+    <div class="card">
+      <div class="diagcap good">Recommended — main nav collapses to icons</div>
+      <div class="win">
+        <div class="top"><div class="s"></div></div>
+        <div class="body">
+          <div class="reg navicon"><div class="navrow"><div class="nl" style="width:16px;height:16px;border-radius:4px"></div><div class="nl" style="width:16px;height:16px;border-radius:4px"></div><div class="nl on" style="width:16px;height:16px;border-radius:4px"></div></div></div>
+          <div class="reg threads"><div class="ico"></div><span class="lab">threads</span></div>
+          <div class="reg content"><span class="lab">conversation — more room</span></div>
+        </div>
+      </div>
+      <p class="factline">Global nav stays reachable as an <b>icon rail</b>; the thread list gets room; focus goes to the chat.</p>
+    </div>
+  </div>
+
+  <div class="rec"><span class="k">Recommend</span><div><p>
+    On <code>/chat</code>, <b>auto-collapse the main app nav to its 72px icon rail</b> and let the threads rail breathe. This is
+    the "focused workspace" convention (Slack/Gmail/Linear).</p>
+    <p style="margin-top:10px"><b>Make it route-driven, not entry-driven</b> — and that single choice dissolves your worry.
+    You noticed it'd feel weird if the collapse depended on <i>how</i> you arrived (rail-expand vs nav-click). So don't tie it to
+    the entrance: tie it to <b>being on <code>/chat</code></b>. Every path in produces the identical layout — collapsed icon nav +
+    threads rail + conversation. Nothing jumps.</p>
+    <ul class="tick" style="margin-top:10px">
+      <li>User can <b>manually re-expand</b> the main nav if they want it back — their override wins and persists.</li>
+      <li>Leaving <code>/chat</code> restores their normal nav state everywhere else.</li>
+      <li>The icon rail keeps all five destinations one click away — global nav is never trapped behind the chat.</li>
+    </ul>
+  </div></div>
+  <div class="note"><span class="k">Why not zero navs?</span><div>Hiding the main nav entirely on <code>/chat</code> would make chat
+    feel like a separate app and strand the user. The icon rail is the sweet spot: present, quiet, out of the way.</div></div>
+</div></section>
+
+<!-- ============ Q5 ============ -->
+<section class="band"><div class="wrap">
+  <div class="qhead"><span class="qnum">05</span><h2>The header borders don't line up</h2></div>
+  <p class="lead">Good eye — and it's a one-line fix. Everything in the shell is deliberately <b style="color:var(--ink)">60px</b>
+    (the top bar and the nav header even carry a code comment saying they must match). The <b style="color:var(--ink)">only</b>
+    offender is the docked copilot header at <b style="color:var(--ink)">52px</b> — so its bottom hairline never meets the
+    continuous line the rest of the shell shares.</p>
+
+  <div class="grid g2" style="margin-top:24px">
+    <div class="card">
+      <div class="diagcap bad">Today — 52 breaks the line</div>
+      <div class="xsec">
+        <div class="col"><div class="hd" style="height:34px">Top bar</div><div class="lbl"><span class="n">60</span>px</div></div>
+        <div class="col"><div class="hd" style="height:34px">Nav header</div><div class="lbl"><span class="n">60</span>px</div></div>
+        <div class="col"><div class="hd bad" style="height:28px">Dock header</div><div class="lbl"><span class="n bad">52</span>px ✕</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="diagcap good">Fixed — one gridline</div>
+      <div class="xsec">
+        <div class="col"><div class="hd" style="height:34px">Top bar</div><div class="lbl"><span class="n">60</span>px</div></div>
+        <div class="col"><div class="hd" style="height:34px">Nav header</div><div class="lbl"><span class="n">60</span>px</div></div>
+        <div class="col"><div class="hd" style="height:34px">Dock header</div><div class="lbl"><span class="n">60</span>px ✓</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rec"><span class="k">Recommend</span><div><p>
+    <b>Yes, fix it.</b> Set the docked copilot header to <b>60px</b> to meet the shared line. For a tool that has to read as
+    bank-credible, a broken horizontal rule is exactly the kind of subconscious "this is a bit sloppy" signal worth erasing.
+    While in there, promote 60px to a single <code>--header-h</code> token that all four headers (top bar, nav, dock, threads
+    rail) reference — so they can never silently drift apart again.</p>
+  </div></div>
+</div></section>
+
+<!-- ============ Q6 ============ -->
+<section class="band"><div class="wrap">
+  <div class="qhead"><span class="qnum">06</span><h2>Is the copilot's colour right?</h2></div>
+  <p class="lead">The <b style="color:var(--ink)">hue is right</b> — the copilot wears the Bricklayer brand indigo→violet, and it
+    <i>should</i>. Giving the AI its own colour would fragment the identity and imply it's a bolted-on third-party thing. Keep the
+    brand. The issue is <b style="color:var(--ink)">treatment hierarchy</b>: the full multi-stop gradient is currently painted on
+    ~5 things on a single screen — the FAB, the nav pill, the dock header square, the empty-state hero, and the thread-rail badge.
+    Repeated that often, the "special" gradient stops feeling special, and it out-shouts the rest of the app (whose interactive
+    elements use the flat indigo <code>--primary</code>).</p>
+
+  <div class="card" style="margin-top:24px">
+    <h4 style="margin-bottom:16px">Proposed treatment ladder</h4>
+    <div class="grid g3">
+      <div class="sw">
+        <div class="swatch" style="background:var(--app-grad)"><span class="emb"><svg viewBox="0 0 24 24"><use href="#emb"/></svg></span></div>
+        <div><div class="swrole"><b>Gradient</b> — the brand moment</div>
+          <div class="swname">The one summon control + the empty-state hero. Max once or twice per screen.</div></div>
+      </div>
+      <div class="sw">
+        <div class="swatch" style="background:var(--app-primary)"><span class="emb"><svg viewBox="0 0 24 24"><use href="#emb"/></svg></span></div>
+        <div><div class="swrole"><b>Solid indigo</b> — small identity</div>
+          <div class="swname">Dock header badge, thread-rail badge, in-message avatar. Uses <code>--primary #653ed3</code> like the rest of the app.</div></div>
+      </div>
+      <div class="sw">
+        <div class="swatch" style="background:var(--canvas-2);border-color:var(--hairline)"><span class="emb" style="background:rgba(101,62,211,.16)"><svg viewBox="0 0 24 24" style="color:#9b86f5"><use href="#emb"/></svg></span></div>
+        <div><div class="swrole"><b>Tinted / mono</b> — quiet chrome</div>
+          <div class="swname">Tiny or repeated glyphs where even solid indigo is too loud.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rec"><span class="k">Recommend</span><div><p>
+    <b>Keep the hue; introduce a hierarchy.</b> Reserve the <code>--brand-gradient-action</code> for the <b>single summon
+    affordance</b> and the <b>empty-state hero</b> — the genuine "enter the AI" brand moments. Downgrade the small, repeated
+    identity glyphs (dock header, thread badge, message avatars) to <b>solid <code>--primary</code> indigo</b> or a soft tint, so
+    they match how every other interactive element in the app is coloured. The gradient becomes punctuation, not wallpaper — and
+    the copilot stops looking like it's on a different design system than the tool it lives in.</p>
+    <p style="margin-top:8px" class="muted">Keep the brick-courses emblem itself — it's on-brand and distinctive; this is purely
+      about the <i>fill</i> behind it.</p>
+  </div></div>
+</div></section>
+
+<!-- ============ NEXT ============ -->
+<section class="band"><div class="wrap">
+  <div class="eyebrow">Your move</div>
+  <h2>Tell me which to build</h2>
+  <p class="lead" style="margin-top:14px">Every recommendation above is independent — cherry-pick freely. The likely order,
+    cheapest-and-safest first:</p>
+  <ul class="tick" style="margin-top:16px;max-width:80ch">
+    <li><b>#5 header alignment</b> &amp; <b>#6 colour hierarchy</b> — pure polish, tiny diffs, zero behaviour risk. Easy yes.</li>
+    <li><b>#1 one trigger, drop the stray <span class="kbd">⌘K</span> badge</b> — removes a redundant button and a false shortcut hint in one pass.</li>
+    <li><b>#4 route-driven nav collapse</b> — the biggest feel improvement; a contained change to the shell + <code>/chat</code>.</li>
+    <li><b>#2 continuous promote</b> &amp; <b>#3 unified entrances</b> — the two that make the surfaces finally feel like one agent.</li>
+  </ul>
+  <div class="note" style="margin-top:20px"><span class="k">Note</span><div>All six sit comfortably inside the ratified two-surface
+    doctrine — nothing here reopens a locked decision. It's the connective tissue between the surfaces that needs the work, not the
+    surfaces themselves.</div></div>
+</div></section>
+
+<footer class="footer"><div class="wrap">
+  <div class="brand"><svg class="glyph" viewBox="0 0 24 24" style="width:16px;height:16px;color:var(--primary)"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" fill="currentColor"/></svg>Bricklayer</div>
+  <span>Brandcave · copilot UX recommendations · July 2026</span>
+  <span class="muted">Advisory — no code changed</span>
+</div></footer>

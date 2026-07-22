@@ -10,6 +10,7 @@ import { Logo } from "@/components/atoms/Logo";
 import { Tooltip } from "@/components/atoms/Tooltip";
 import { SummonButton } from "@/components/molecules/SummonButton";
 import { useUIStore } from "@/store/ui.store";
+import { HEADER_H } from "@/lib/layout";
 
 interface NavItem {
   href: string;
@@ -27,7 +28,6 @@ const ITEMS: NavItem[] = [
 
 const EXPANDED = 236;
 const COLLAPSED = 72;
-const HEADER_H = 60; // must equal TopBar height so the dividers align
 
 // eased resize (feels more controlled than a bouncy spring for a panel)
 const RESIZE = { duration: 0.34, ease: [0.4, 0, 0.2, 1] as const };
@@ -36,7 +36,13 @@ const HIGHLIGHT = { type: "spring" as const, stiffness: 400, damping: 34 };
 
 export function AppNav() {
   const pathname = usePathname();
-  const collapsed = useUIStore((s) => s.navCollapsed);
+  const navCollapsed = useUIStore((s) => s.navCollapsed);
+  const chatNavExpanded = useUIStore((s) => s.chatNavExpanded);
+  // On the full-page chat the nav auto-collapses to icons so the thread rail has
+  // room — route-driven, so it looks the same however you arrived. The user can
+  // still re-expand it there (session-only override).
+  const isChat = pathname.startsWith("/chat");
+  const collapsed = isChat ? !chatNavExpanded : navCollapsed;
 
   return (
     <motion.nav
@@ -167,7 +173,7 @@ export function AppNav() {
 
       {/* footer — summon only */}
       <div style={{ marginTop: "auto", padding: collapsed ? "0 12px var(--s-4)" : "0 16px var(--s-4)" }}>
-        <SummonButton variant="nav" collapsed={collapsed} />
+        <SummonButton collapsed={collapsed} />
       </div>
     </motion.nav>
   );

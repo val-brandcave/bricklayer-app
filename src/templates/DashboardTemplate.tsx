@@ -156,10 +156,10 @@ function DashboardSwitcher({
           onMouseEnter={(e) => !loading && (e.currentTarget.style.background = "var(--surface-3)")}
           onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
         >
-          <h1 style={{ fontSize: 21, fontWeight: 680, lineHeight: 1.15, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <h1 style={{ fontSize: 18, fontWeight: 680, lineHeight: 1.15, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {loading ? "Loading…" : active?.name ?? "No dashboards"}
           </h1>
-          <ChevronDown size={19} strokeWidth={2.2} style={{ color: "var(--muted)", flexShrink: 0 }} aria-hidden />
+          <ChevronDown size={17} strokeWidth={2.2} style={{ color: "var(--muted)", flexShrink: 0 }} aria-hidden />
         </button>
       )}
     />

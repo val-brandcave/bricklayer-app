@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bricklayer — IA Board (canvas)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ---- Voltagent DS (dark) — mirrors ia-object-model.html ---- */
+    --canvas:#0d0d0d; --canvas-soft:#1a1a1a; --canvas-2:#141414; --lift:#17181b;
+    --hairline:#3d3a39; --hairline-2:#2a2827;
+    --primary:#00d992; --primary-soft:#2fd6a1; --on-primary:#0d1211;
+    --ink-strong:#ffffff; --ink:#f2f2f2; --ink-2:#bdbdbd; --ink-3:#8b949e; --mute:#8b949e;
+    /* decision-state legend */
+    --locked:#00d992; --planned:#4ea8ff; --open:#ffb84d; --deferred:#8b949e;
+    /* categorical (for the object-model flow accents) */
+    --c1:#00d992; --c2:#4ea8ff; --c3:#b98cff; --c4:#ffb84d;
+    --line:#4b525c;
+    --r:10px;
+    font-family:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:var(--canvas);color:var(--ink);
+    font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased;
+    font-feature-settings:"calt","rlig";}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* ---- canvas viewport + world ---- */
+  #viewport{position:fixed;inset:0;overflow:hidden;cursor:grab;touch-action:none;
+    background:
+      radial-gradient(circle at 1px 1px, #24262c 1px, transparent 0) 0 0/26px 26px,
+      radial-gradient(1200px 800px at 78% -6%, rgba(0,217,146,.05), transparent 60%),
+      var(--canvas);}
+  #viewport.grabbing{cursor:grabbing}
+  #world{position:absolute;top:0;left:0;transform-origin:0 0;user-select:none;will-change:transform}
+
+  /* ---- area container ---- */
+  .area{position:absolute;background:rgba(255,255,255,.018);border:1px solid var(--hairline);
+    border-radius:16px;padding:40px 26px 28px;width:max-content}
+  .area.flat{padding-bottom:26px}
+  .area.tint-green{background:rgba(0,217,146,.035);border-color:rgba(0,217,146,.28)}
+  .area > .area-label{position:absolute;top:-14px;left:20px;background:var(--canvas-soft);
+    color:var(--ink-strong);font-weight:600;font-size:12.5px;letter-spacing:.02em;
+    padding:6px 14px 6px 12px;border-radius:9px;border:1px solid var(--hairline);
+    box-shadow:0 6px 18px rgba(0,0,0,.4);display:inline-flex;align-items:center;gap:8px}
+  .area > .area-label::before{content:"";width:8px;height:8px;border-radius:2px;
+    background:var(--primary);box-shadow:0 0 10px rgba(0,217,146,.6)}
+  .area.tint-green > .area-label{border-color:rgba(0,217,146,.4)}
+  .area-note{font-size:11.5px;color:var(--mute);margin:-6px 0 18px;max-width:760px;line-height:1.5}
+
+  /* ---- card ---- */
+  .node{position:relative;z-index:1;display:inline-block;width:250px;vertical-align:top;text-align:left}
+  .card{background:var(--lift);border:1px solid var(--hairline);border-radius:var(--r);
+    box-shadow:0 1px 2px rgba(0,0,0,.4),0 8px 22px rgba(0,0,0,.28);
+    padding:26px 14px 15px;position:relative;min-height:120px;cursor:zoom-in;
+    transition:box-shadow .16s ease,border-color .16s ease,transform .16s ease}
+  .card:hover{box-shadow:0 2px 4px rgba(0,0,0,.45),0 14px 30px rgba(0,0,0,.4),0 0 0 1px rgba(0,217,146,.18);
+    border-color:rgba(0,217,146,.4);transform:translateY(-2px)}
+  .pill{position:absolute;top:-11px;left:12px;color:var(--on-primary);font-weight:600;font-size:11px;
+    padding:4px 11px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.4);max-width:220px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.01em}
+  .pill.locked{background:var(--locked)} .pill.planned{background:var(--planned)}
+  .pill.open{background:var(--open)} .pill.deferred{background:var(--deferred)}
+  .card .body{display:flex;gap:11px}
+  .thumb{flex:0 0 62px;height:62px;
+    background:repeating-linear-gradient(135deg,#17181b 0 6px,#202126 6px 12px);
+    border:1px solid var(--hairline);border-radius:7px;display:grid;place-items:center;
+    text-align:center;font-size:8.5px;color:var(--ink-3);padding:4px;line-height:1.2}
+  .card .desc{flex:1;font-size:11.5px;color:var(--ink-2);line-height:1.5}
+  .card .desc b{color:var(--ink-strong);font-weight:600}
+  .card .route{display:block;color:var(--primary-soft);font-weight:600;font-size:10.5px;margin-bottom:4px;
+    font-variant-numeric:tabular-nums}
+  .card .openq{display:block;margin-top:7px;color:var(--open);font-size:10.5px;font-weight:500;line-height:1.4}
+  .kindtag{position:absolute;top:8px;right:10px;font-size:8.5px;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-3)}
+
+  /* ---- tree layout (SVG connectors drawn from real positions) ---- */
+  .tree{display:inline-block;position:relative;padding-top:4px}
+  .tree ul{display:flex;justify-content:center;padding-top:38px;position:relative}
+  .tree li{list-style:none;position:relative;padding:0 15px;text-align:center}
+  .tree > ul{padding-top:0}
+  .conn-svg{position:absolute;top:0;left:0;overflow:visible;pointer-events:none;z-index:0}
+
+  /* ---- flat + flow rows ---- */
+  .flatrow{display:flex;flex-wrap:wrap;gap:20px}
+  .flowrow{display:flex;flex-wrap:nowrap;align-items:center;gap:0}
+  .flowarrow{flex:0 0 42px;display:flex;align-items:center;justify-content:center;
+    color:var(--primary);font-size:22px;font-weight:300}
+  .subview .pill::before{content:'▸ ';opacity:.85}
+  .modalnode .pill::before{content:'⊞ ';opacity:.9}
+
+  /* ---- floating chrome ---- */
+  .toolbar{position:fixed;top:14px;left:14px;z-index:30;display:flex;align-items:center;gap:12px;
+    background:rgba(18,18,18,.92);backdrop-filter:blur(10px);border:1px solid var(--hairline);
+    border-radius:14px;padding:10px 15px;box-shadow:0 10px 30px rgba(0,0,0,.5);
+    max-width:min(760px,calc(100vw - 28px))}
+  .toolbar .brand{display:flex;align-items:center;gap:9px;white-space:nowrap}
+  .toolbar .brand svg{width:17px;height:17px;color:var(--primary);flex:0 0 auto}
+  .toolbar .ttl{font-weight:700;color:var(--ink-strong);font-size:14px;letter-spacing:-.01em}
+  .toolbar .sub{font-size:10.5px;color:var(--mute);border-left:1px solid var(--hairline);padding-left:12px;white-space:nowrap}
+  .toolbar .legend{display:flex;flex-wrap:wrap;gap:11px;align-items:center;border-left:1px solid var(--hairline);padding-left:13px}
+  .toolbar .lg{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2)}
+  .toolbar .dot{width:9px;height:9px;border-radius:3px}
+  .toolbar .sym{color:var(--mute);font-size:11px}
+  .zoombar{position:fixed;top:14px;right:14px;z-index:30;display:flex;align-items:center;gap:6px;
+    background:rgba(18,18,18,.92);backdrop-filter:blur(10px);border:1px solid var(--hairline);
+    border-radius:14px;padding:7px 9px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+  .zoombar button{font-family:inherit;border:1px solid var(--hairline);background:var(--lift);
+    color:var(--ink);border-radius:9px;height:34px;min-width:34px;padding:0 11px;font-size:13px;
+    font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+    transition:background .12s,border-color .12s,color .12s}
+  .zoombar button:hover{background:#202126;border-color:rgba(0,217,146,.4);color:var(--primary-soft)}
+  .zoombar .zlevel{min-width:50px;text-align:center;font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
+  .hint{position:fixed;bottom:14px;left:14px;z-index:30;background:rgba(18,18,18,.9);
+    border:1px solid var(--hairline);border-radius:10px;padding:7px 12px;font-size:11.5px;
+    color:var(--mute);box-shadow:0 8px 22px rgba(0,0,0,.45)}
+  .hint b{color:var(--primary-soft);font-weight:600}
+
+  /* ---- minimap ---- */
+  #minimap{position:fixed;bottom:14px;right:14px;z-index:30;width:232px;height:160px;
+    background:rgba(18,18,18,.94);border:1px solid var(--hairline);border-radius:12px;
+    box-shadow:0 10px 30px rgba(0,0,0,.55);overflow:hidden;cursor:pointer}
+  #minimap .mm-inner{position:absolute;inset:0}
+  #minimap .mm-area{position:absolute;border-radius:3px}
+  #minimap .mm-view{position:absolute;border:2px solid var(--primary);background:rgba(0,217,146,.12);border-radius:3px;pointer-events:none}
+  #minimap .mm-label{position:absolute;top:5px;left:8px;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <span class="brand">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" fill="currentColor"/></svg>
+      <span class="ttl">Bricklayer · IA & Object Model</span>
+    </span>
+    <span class="sub">Discovery · v2 (HubSpot-anchored)</span>
+    <span class="legend">
+      <span class="lg"><span class="dot" style="background:var(--locked)"></span>Locked</span>
+      <span class="lg"><span class="dot" style="background:var(--planned)"></span>Planned</span>
+      <span class="lg"><span class="dot" style="background:var(--open)"></span>Open question</span>
+      <span class="lg"><span class="dot" style="background:var(--deferred)"></span>Deferred</span>
+      <span class="lg sym">⊞ modal · ▸ sub-view</span>
+    </span>
+  </div>
+
+  <div class="zoombar">
+    <button id="z-out" title="Zoom out">−</button>
+    <span class="zlevel" id="zlevel">100%</span>
+    <button id="z-in" title="Zoom in">+</button>
+    <button id="z-fit" title="Fit whole board">Fit</button>
+    <button id="z-reset" title="Reset to 100%">Reset</button>
+  </div>
+
+  <div id="viewport">
+    <div id="world"></div>
+  </div>
+
+  <div id="minimap"><div class="mm-inner" id="mm-inner"></div><span class="mm-label">Overview</span></div>
+  <div class="hint">Scroll / pinch to <b>zoom</b> · drag to <b>pan</b> · click a <b>card</b> to focus · click empty space to <b>fit</b></div>
+
+<script>
+/* ============================================================
+   IA DATA — Bricklayer, sourced from DIRECTION-v2-hubspot-anchored.md
+   & ia-object-model.html. Decision-state legend (see §9 LOCKED).
+   Canvas engine ported from the Parachute v2 IA board.
+   ============================================================ */
+const AREAS = [
+  /* ---- 1 · the signature object-model flow ---- */
+  {
+    label:'Object model · locked vocabulary', kind:'flow', tint:true,
+    note:'One sentence: a WIDGET (type) is configured with data into a REPORT (object), which appears as a TILE on a DASHBOARD — or as an MCP APP in chat. Four nouns, adopted verbatim from HubSpot to end the term-collision.',
+    roots:[
+      { name:'Widget', status:'locked', role:'The type',
+        desc:'The <b>kind</b> of visualization — bar, line, scatter, map, heatmap, KPI, table… ~14 primitives. <b>This is what we build.</b>' },
+      { name:'Report', status:'locked', role:'The object',
+        desc:'A saved, data-bound <b>instance</b> — "Avg cap rate by vintage." Listable, permissioned, reusable. HubSpot\'s core noun.' },
+      { name:'Dashboard', status:'locked', role:'The collection',
+        desc:'A saved <b>collection of reports</b> on a grid canvas — one purpose or role. (Ed\'s "board," renamed.)' },
+      { name:'Tile', status:'locked', role:'Render A',
+        desc:'The report rendered <b>on a dashboard</b>.' },
+      { name:'MCP app', status:'locked', role:'Render B',
+        desc:'The <b>same</b> report rendered <b>in chat</b>, with Save / Edit.' }
+    ]
+  },
+
+  /* ---- 2 · the app spine: five destinations ---- */
+  {
+    label:'The app · five destinations', kind:'tree',
+    note:'The signed-in shell — a left-nav (Insights · Dashboards · Reports · Properties · Chat), a top bar, and the summonable co-working chat dock. Mirrors HubSpot\'s Reporting split, plus the two things HubSpot has no home for: per-lens Insights and a first-class Chat.',
+    roots:[
+      { name:'App shell', status:'locked', kind:'page',
+        desc:'The frame around every signed-in screen: left-nav, top bar with search &amp; profile, and the right-docked co-working chat.',
+        children:[
+
+          { name:'Insights', status:'planned', route:'/insights', kind:'destination',
+            desc:'<b>The per-lens landing</b> — you land here on login, <i>for your lens</i>. The opinion / critique layer: claim → evidence → <b>Bricklayer\'s Read</b> → action. Not a dashboard copy.',
+            openq:'How "good" is defined per lens (fixed / per-bank / learned from dismissals)',
+            children:[
+              { name:'Today narrative', status:'planned', kind:'subview',
+                desc:'The AI "TODAY" read — a narrative of what needs attention now, for this lens.' },
+              { name:'Findings + Surprising links', status:'planned', kind:'subview',
+                desc:'Scrollable <b>finding-cards</b> plus an LLM-discovered "surprising links" correlation row (curated per lens).' },
+              { name:'Focus panel', status:'planned', kind:'subview',
+                desc:'Click a card → chart swaps in + <b>BRICKLAYER\'S READ</b> (skeptical self-critique), <b>Dig deeper</b> chips, and an inline <b>Ask</b> box.' }
+            ]},
+
+          { name:'Dashboards', status:'locked', route:'/dashboards', kind:'destination',
+            desc:'<b>Saved collections of Reports</b> on a grid canvas — one per purpose / role. A report attaches to many dashboards and inherits the dashboard\'s access.',
+            children:[
+              { name:'Dashboard switcher', status:'locked', kind:'subview',
+                desc:'Top-left: All / Favorites / Mine + search. Each lens gets a star-set <b>default</b>.' },
+              { name:'Grid canvas', status:'locked', route:'/dashboards/[id]', kind:'subview',
+                desc:'Drag to rearrange (grid overlay), bottom-right <b>resize handle</b>, autosave, per-tile ⋮ menu, "Add content → Report."' },
+              { name:'List / manage', status:'locked', kind:'subview',
+                desc:'All dashboards, user- &amp; AI-made. Access levels; deleted restorable ~14 days.',
+                openq:'Per-lens default dashboard content (deferred to Ed\'s video + Friday demo)' }
+            ]},
+
+          { name:'Reports', status:'locked', route:'/reports', kind:'destination',
+            desc:'<b>The library</b> — every Report, user- and AI-made. Filter by owner · last-updated · dashboard · tags; saved views. <b>The agent is just another author.</b>',
+            children:[
+              { name:'Standalone report', status:'locked', kind:'subview',
+                desc:'A report saved with <b>no dashboard</b>, living in the library — attaches to many dashboards later.' },
+              { name:'Starter catalog', status:'locked', kind:'subview',
+                desc:'"Add a widget" modal = a catalog of ~19 <b>pre-built domain reports</b> (Avg cap rate by vintage, Value vs cap by class…).' }
+            ]},
+
+          { name:'Properties', status:'planned', route:'/properties', kind:'destination',
+            desc:'<b>The individual-asset altitude</b> — portfolio → property drill-down, with per-property provenance.',
+            children:[
+              { name:'Portfolio view', status:'planned', kind:'subview',
+                desc:'Book-wide roll-up across the $6.5B / 3,935 appraisals; drill into any property.' },
+              { name:'Property workspace', status:'planned', route:'/properties/[id]', kind:'subview',
+                desc:'Valuation-approach variance, cap-rate sensitivity grid, comparable-sales table w/ CoV badge, appraisal-detail table, signals &amp; "Worth a check" anomaly flags, per-tile provenance.' }
+            ]},
+
+          { name:'Chat', status:'locked', route:'/chat', kind:'destination',
+            desc:'<b>Two surfaces, one agent</b> — placement encodes the AI\'s role. Docks <b>right</b> (assistant over existing dashboards), never left.',
+            children:[
+              { name:'Co-working assistant', status:'locked', kind:'subview',
+                desc:'<b>Right-docked, summonable</b> (⌘K). Page- &amp; context-aware; takes <b>write actions</b> (create report, add to dashboard). Promotable to full-page.' },
+              { name:'Full-page chat', status:'planned', kind:'subview',
+                desc:'Its <b>own page</b>, threaded. Ask book-wide questions; agent returns <b>MCP apps</b>; null state = suggested prompts.',
+                children:[
+                  { name:'MCP app', status:'planned', kind:'subview',
+                    desc:'The same report rendered in chat, with <b>Save / Edit</b>. Save opens the shared add-to-dashboard modal → it lands in the Reports library.' }
+                ]}
+            ]}
+        ]}
+    ]
+  },
+
+  /* ---- 3 · shared overlays & modals ---- */
+  {
+    label:'Global overlays & modals', kind:'flat', flatW:820,
+    note:'Shared surfaces reached from many places. Create/edit = app-level modals, NOT the in-chat drawer — one editor, two entry points.',
+    roots:[
+      { name:'Report builder', status:'locked', kind:'modal',
+        desc:'The full chart editor: search property → axis → measure → break down → frequency → filter → chart type → Save. <b>One editor, two entry points</b> (dashboard "Add content" or Save/Edit on an MCP app).' },
+      { name:'Add to dashboard', status:'locked', kind:'modal',
+        desc:'Save flow: <b>don\'t add / add to existing / add to new</b> → set access. App-level modal, not the chat drawer.' },
+      { name:'New dashboard', status:'locked', kind:'modal',
+        desc:'Create a fresh dashboard and set its access level.' },
+      { name:'Command palette', status:'planned', kind:'modal',
+        desc:'⌘K — jump anywhere, run a quick action, or summon the co-working chat.' },
+      { name:'"Explain this"', status:'planned', kind:'overlay',
+        desc:'Right-click a tile or watchlist row → <b>"Explain this property"</b> → agent reasons in chat (cap below class avg, stale, thin comps) → offers "Open property workspace."' },
+      { name:'Build a dashboard', status:'planned', kind:'overlay',
+        desc:'The agent\'s most powerful move: empty-state chips → agent <b>assembles a whole dashboard</b> → "NEW BOARD READY · 13 widgets · Open (current kept)."' },
+      { name:'Present mode', status:'deferred', kind:'overlay',
+        desc:'A clean, projected view of a dashboard for a meeting. The kept half of the retired board lifecycle.' },
+      { name:'Ephemeral dashboard', status:'deferred', kind:'overlay',
+        desc:'Built for one meeting, then expires — the agent can assemble one on the fly, then let it lapse.' }
+    ]
+  },
+
+  /* ---- 4 · RBAC lenses ---- */
+  {
+    label:'RBAC lenses · set at provisioning', kind:'flat', flatW:820, tint:true,
+    note:'A user\'s lens is set once, at provisioning — it shapes what\'s surfaced, the default dashboard, and how Insights reads. No in-app switcher (a dev-only switcher exists in the demo shell).',
+    roots:[
+      { name:'Portfolio Manager', status:'locked', kind:'lens',
+        desc:'Book-wide concentration &amp; exposure. Whole $6.5B / 3,935 appraisals — Residential 25% ($1.55B), value-vs-cap by class, geo / flood exposure.' },
+      { name:'Credit-Lending Officer', status:'locked', kind:'lens',
+        desc:'Deal- &amp; risk-level scrutiny. Direct-cap reprice stress tile, risk watchlist scored 0–100 + WHY, 1,233 appraisals aged &gt;24mo.' },
+      { name:'Chief Appraiser', status:'locked', kind:'lens',
+        desc:'Valuation quality &amp; workload. Condition → price/SF integrity, appraiser workload (the 300% flag), approach mix / data health.' }
+    ]
+  },
+
+  /* ---- 5 · deliverables as actions ---- */
+  {
+    label:'Deliverables · actions, not a tab', kind:'flat', flatW:540,
+    note:'Export is the "average → great" gap — but in a Dashboards + Reports world it\'s a set of actions hung off dashboards & reports, not its own destination.',
+    roots:[
+      { name:'Export credit packet', status:'planned', kind:'action',
+        desc:'"Export this dashboard as a <b>credit-ready packet</b>" — past HubSpot\'s raw data export.',
+        openq:'hangs off · a dashboard' },
+      { name:'Create credit note', status:'planned', kind:'action',
+        desc:'"Create the <b>credit note</b> for this property" — generated from the report set.',
+        openq:'hangs off · a report / property' }
+    ]
+  }
+];
+
+/* ---------- card / tree renderers ---------- */
+const KIND_LABEL = {tab:'Tab', subview:'Sub-view', overlay:'Overlay', modal:'Modal',
+  destination:'Destination', lens:'Lens', action:'Action'};
+function card(n){
+  const kind = n.kind || 'page';
+  const kindLabel = n.role || KIND_LABEL[kind] || '';
+  const cls = kind==='subview' ? 'subview' : (kind==='modal'||kind==='overlay') ? 'modalnode' : '';
+  return `<div class="node ${cls}">
+    <div class="card">
+      <span class="pill ${n.status}">${n.name}</span>
+      ${kindLabel?`<span class="kindtag">${kindLabel}</span>`:''}
+      <div class="body">
+        <div class="thumb">${n.name}</div>
+        <div class="desc">${n.route?`<span class="route">${n.route}</span>`:''}${n.desc}${n.openq?`<span class="openq">◆ ${n.openq}</span>`:''}</div>
+      </div>
+    </div>
+  </div>`;
+}
+function treeList(nodes){
+  return `<ul>${nodes.map(n=>{
+    const kids = n.children && n.children.length ? treeList(n.children) : '';
+    return `<li>${card(n)}${kids}</li>`;
+  }).join('')}</ul>`;
+}
+function areaHTML(a){
+  const label = `<span class="area-label">${a.label}</span>`;
+  const note = a.note?`<div class="area-note">${a.note}</div>`:'';
+  let inner;
+  if(a.kind==='tree') inner = `<div class="tree">${treeList(a.roots)}</div>`;
+  else if(a.kind==='flow') inner = `<div class="flowrow">${a.roots.map((n,i)=>
+      card(n) + (i<a.roots.length-1?`<div class="flowarrow" aria-hidden="true">→</div>`:'')).join('')}</div>`;
+  else inner = `<div class="flatrow">${a.roots.map(card).join('')}</div>`;
+  return label+note+inner;
+}
+
+/* ---------- build areas + spatial layout ---------- */
+const world = document.getElementById('world');
+const areaEls = AREAS.map(a=>{
+  const el = document.createElement('section');
+  el.className = 'area '+((a.kind==='flat')?'flat ':'')+(a.tint?'tint-green':'');
+  if(a.kind==='flat' && a.flatW) el.style.width = a.flatW+'px';
+  el.innerHTML = areaHTML(a);
+  world.appendChild(el);
+  return el;
+});
+
+let contentW=0, contentH=0;
+function layout(){
+  const m = areaEls.map(el=>({w:el.offsetWidth,h:el.offsetHeight}));
+  const GAP=90;
+  // left column: object-flow (0) over the destinations tree (1)
+  pos(0, 0, 0);
+  pos(1, 0, m[0].h + GAP);
+  const leftW = Math.max(m[0].w, m[1].w);
+  const leftH = m[0].h + GAP + m[1].h;
+  // right column: overlays (2) · lenses (3) · deliverables (4)
+  const rightX = leftW + GAP*1.4;
+  pos(2, rightX, 0);
+  pos(3, rightX, m[2].h + GAP);
+  pos(4, rightX, m[2].h + GAP + m[3].h + GAP);
+  const rightH = m[2].h + GAP + m[3].h + GAP + m[4].h;
+  contentW = rightX + Math.max(m[2].w, m[3].w, m[4].w);
+  contentH = Math.max(leftH, rightH);
+  function pos(i,x,y){areaEls[i].style.left=x+'px';areaEls[i].style.top=y+'px';}
+  buildMinimap(m);
+}
+
+/* ---------- pan / zoom ---------- */
+const vp = document.getElementById('viewport');
+const zlevel = document.getElementById('zlevel');
+const MIN=0.05, MAX=2;
+let scale=1, tx=0, ty=0;
+
+function apply(animate){
+  world.style.transition = animate ? 'transform .35s cubic-bezier(.4,0,.2,1)' : 'none';
+  world.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`;
+  zlevel.textContent = Math.round(scale*100)+'%';
+  updateMiniView();
+}
+const clampS = s => Math.max(MIN, Math.min(MAX, s));
+function zoomAt(cx,cy,factor){
+  const ns = clampS(scale*factor);
+  const wx=(cx-tx)/scale, wy=(cy-ty)/scale;
+  scale=ns; tx=cx-wx*scale; ty=cy-wy*scale; apply();
+}
+function fitView(animate=true){
+  const r=vp.getBoundingClientRect(), pad=90;
+  scale=clampS(Math.min((r.width-pad)/contentW,(r.height-pad)/contentH));
+  tx=(r.width-contentW*scale)/2; ty=(r.height-contentH*scale)/2; apply(animate);
+}
+function resetView(){
+  scale=1; const r=vp.getBoundingClientRect();
+  tx=40; ty=Math.min(40,(r.height-contentH)/2); apply(true);
+}
+function zoomToEl(el){
+  const r=el.getBoundingClientRect(), vr=vp.getBoundingClientRect(), pad=80;
+  const wx=(r.left-vr.left-tx)/scale, wy=(r.top-vr.top-ty)/scale;
+  const wW=r.width/scale, wH=r.height/scale;
+  scale=clampS(Math.min((vr.width-pad)/wW,(vr.height-pad)/wH));
+  tx=(vr.width-wW*scale)/2 - wx*scale;
+  ty=(vr.height-wH*scale)/2 - wy*scale;
+  apply(true);
+}
+
+vp.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=vp.getBoundingClientRect();
+  zoomAt(e.clientX-r.left, e.clientY-r.top, Math.exp(-e.deltaY*0.0015));
+},{passive:false});
+
+let dragging=false, moved=false, sx=0, sy=0;
+vp.addEventListener('pointerdown',e=>{dragging=true;moved=false;sx=e.clientX;sy=e.clientY;vp.classList.add('grabbing');});
+window.addEventListener('pointermove',e=>{
+  if(!dragging)return;
+  const dx=e.clientX-sx, dy=e.clientY-sy;
+  if(Math.abs(dx)+Math.abs(dy)>3) moved=true;
+  tx+=dx; ty+=dy; sx=e.clientX; sy=e.clientY; apply();
+});
+window.addEventListener('pointerup',e=>{
+  if(!dragging)return;
+  dragging=false; vp.classList.remove('grabbing');
+  if(moved) return;                               // it was a pan, not a click
+  const t=document.elementFromPoint(e.clientX,e.clientY);
+  const cardEl = t && t.closest && t.closest('.card');
+  if(cardEl) zoomToEl(cardEl);
+  else if(t && (t.id==='viewport' || t.id==='world' || (t.classList&&t.classList.contains('area')))) fitView();
+});
+
+document.getElementById('z-in').onclick = ()=>{const r=vp.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1.25);};
+document.getElementById('z-out').onclick = ()=>{const r=vp.getBoundingClientRect();zoomAt(r.width/2,r.height/2,0.8);};
+document.getElementById('z-fit').onclick = ()=>fitView();
+document.getElementById('z-reset').onclick = ()=>resetView();
+window.addEventListener('keydown',e=>{
+  if(e.key==='+'||e.key==='='){document.getElementById('z-in').click();}
+  else if(e.key==='-'){document.getElementById('z-out').click();}
+  else if(e.key==='0'){fitView();}
+});
+
+/* ---------- minimap ---------- */
+const mmInner = document.getElementById('mm-inner');
+const minimap = document.getElementById('minimap');
+let mmScale=1, mmOffX=0, mmOffY=0, mmView;
+const AREA_FILL=['rgba(0,217,146,.22)','rgba(0,217,146,.16)','rgba(78,168,255,.20)','rgba(255,184,77,.18)','rgba(139,148,158,.20)'];
+function buildMinimap(m){
+  const box=minimap.getBoundingClientRect(), pad=12;
+  mmScale=Math.min((box.width-pad*2)/contentW,(box.height-pad*2)/contentH);
+  mmOffX=(box.width-contentW*mmScale)/2; mmOffY=(box.height-contentH*mmScale)/2;
+  mmInner.innerHTML='';
+  areaEls.forEach((el,i)=>{
+    const d=document.createElement('div'); d.className='mm-area';
+    d.style.left=(mmOffX+el.offsetLeft*mmScale)+'px';
+    d.style.top=(mmOffY+el.offsetTop*mmScale)+'px';
+    d.style.width=(el.offsetWidth*mmScale)+'px';
+    d.style.height=(el.offsetHeight*mmScale)+'px';
+    d.style.background=AREA_FILL[i]||'rgba(255,255,255,.14)';
+    d.style.border='1px solid rgba(0,217,146,.28)';
+    mmInner.appendChild(d);
+  });
+  mmView=document.createElement('div'); mmView.className='mm-view'; mmInner.appendChild(mmView);
+}
+function updateMiniView(){
+  if(!mmView)return;
+  const r=vp.getBoundingClientRect();
+  const visX=-tx/scale, visY=-ty/scale, visW=r.width/scale, visH=r.height/scale;
+  mmView.style.left=(mmOffX+visX*mmScale)+'px';
+  mmView.style.top=(mmOffY+visY*mmScale)+'px';
+  mmView.style.width=(visW*mmScale)+'px';
+  mmView.style.height=(visH*mmScale)+'px';
+}
+minimap.addEventListener('click',e=>{
+  const box=minimap.getBoundingClientRect();
+  const wx=(e.clientX-box.left-mmOffX)/mmScale, wy=(e.clientY-box.top-mmOffY)/mmScale;
+  const r=vp.getBoundingClientRect();
+  tx=r.width/2-wx*scale; ty=r.height/2-wy*scale; apply(true);
+});
+
+/* ---------- connectors (SVG, computed from real card positions) ---------- */
+function drawTreeConnectors(){
+  document.querySelectorAll('.conn-svg').forEach(s=>s.remove());
+  const prevT = world.style.transform;
+  world.style.transform = 'none';                 // measure at scale 1
+  const NS='http://www.w3.org/2000/svg';
+  document.querySelectorAll('.area .tree').forEach(tree=>{
+    const tr = tree.getBoundingClientRect();
+    const rel = el=>{const r=el.getBoundingClientRect();return{cx:r.left+r.width/2-tr.left, top:r.top-tr.top, bottom:r.bottom-tr.top};};
+    const svg = document.createElementNS(NS,'svg');
+    svg.setAttribute('class','conn-svg');
+    svg.setAttribute('width', tree.scrollWidth);
+    svg.setAttribute('height', tree.scrollHeight);
+    tree.querySelectorAll('li').forEach(li=>{
+      const pc = li.querySelector(':scope > .node > .card'); if(!pc) return;
+      const kids = [...li.querySelectorAll(':scope > ul > li > .node > .card')]; if(!kids.length) return;
+      const p = rel(pc), k = kids.map(rel);
+      const childTop = Math.min(...k.map(x=>x.top));
+      const busY = p.bottom + (childTop - p.bottom)/2;     // elbow midline
+      const minX = Math.min(...k.map(x=>x.cx)), maxX = Math.max(...k.map(x=>x.cx));
+      let d = `M ${p.cx} ${p.bottom} V ${busY} M ${minX} ${busY} H ${maxX} `;
+      k.forEach(x=>{ d += `M ${x.cx} ${busY} V ${x.top} `; });
+      const path = document.createElementNS(NS,'path');
+      path.setAttribute('d', d);
+      path.setAttribute('fill','none');
+      path.setAttribute('stroke','var(--line)');
+      path.setAttribute('stroke-width','2');
+      path.setAttribute('stroke-linecap','round');
+      svg.appendChild(path);
+    });
+    tree.insertBefore(svg, tree.firstChild);
+  });
+  world.style.transform = prevT;
+}
+
+/* ---------- init ---------- */
+function init(){ layout(); drawTreeConnectors(); fitView(false); }
+window.addEventListener('load', init);
+if(document.fonts && document.fonts.ready){ document.fonts.ready.then(init); }
+window.addEventListener('resize', ()=>{ layout(); drawTreeConnectors(); updateMiniView(); });
+init();
+</script>
+</body>
+</html>

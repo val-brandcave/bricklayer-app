@@ -5,21 +5,13 @@ import { EmblemMark } from "@/components/atoms/EmblemMark";
 import { useUIStore } from "@/store/ui.store";
 import { SPRING } from "@/lib/motion";
 
-/* The summon-AI control. One of the two places the brand gradient is allowed on
-   an interactive surface. The mark is the Bricklayer emblem (monochrome/white on
-   the gradient) — never a generic sparkle. */
-export function SummonButton({
-  variant = "nav",
-  context,
-  collapsed = false,
-}: {
-  variant?: "nav" | "fab";
-  context?: string;
-  collapsed?: boolean;
-}) {
+/* The summon-AI control — the single persistent way to open the right-docked
+   co-working copilot (lives in the nav footer). One of the two places the brand
+   gradient is allowed on an interactive surface (the other is the full-page
+   chat's empty-state hero). The mark is the Bricklayer emblem — never a generic
+   sparkle. Collapsed nav → square icon button; expanded → full-width label. */
+export function SummonButton({ collapsed = false }: { collapsed?: boolean }) {
   const toggleChat = useUIStore((s) => s.toggleChat);
-  const openChat = useUIStore((s) => s.openChat);
-  const onClick = () => (context ? openChat(context) : toggleChat());
 
   const gradientBase: React.CSSProperties = {
     border: "none",
@@ -28,43 +20,13 @@ export function SummonButton({
     cursor: "pointer",
   };
 
-  if (variant === "fab") {
-    return (
-      <motion.button
-        type="button"
-        onClick={onClick}
-        aria-label="Ask Bricklayer"
-        title="Ask Bricklayer (⌘K)"
-        whileHover={{ y: -2, filter: "brightness(1.08)" }}
-        whileTap={{ scale: 0.94 }}
-        transition={SPRING.snappy}
-        style={{
-          ...gradientBase,
-          position: "fixed",
-          right: 24,
-          bottom: 24,
-          width: 54,
-          height: 54,
-          borderRadius: "var(--r-pill)",
-          boxShadow: "var(--shadow-lg)",
-          display: "grid",
-          placeItems: "center",
-          zIndex: 40,
-        }}
-      >
-        <EmblemMark size={24} tone="current" />
-      </motion.button>
-    );
-  }
-
-  // collapsed nav → square icon button
   if (collapsed) {
     return (
       <motion.button
         type="button"
-        onClick={onClick}
+        onClick={toggleChat}
         aria-label="Ask Bricklayer"
-        title="Ask Bricklayer (⌘K)"
+        title="Ask Bricklayer"
         whileHover={{ y: -1, filter: "brightness(1.06)" }}
         whileTap={{ scale: 0.94 }}
         transition={SPRING.snappy}
@@ -83,11 +45,10 @@ export function SummonButton({
     );
   }
 
-  // expanded nav → full-width labelled button
   return (
     <motion.button
       type="button"
-      onClick={onClick}
+      onClick={toggleChat}
       whileHover={{ y: -1, filter: "brightness(1.06)" }}
       whileTap={{ scale: 0.98 }}
       transition={SPRING.snappy}

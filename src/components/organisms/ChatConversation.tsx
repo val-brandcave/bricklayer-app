@@ -231,7 +231,7 @@ function Avatar({ processing = false }: { processing?: boolean }) {
         width: 30,
         height: 30,
         borderRadius: "var(--r-md)",
-        background: "var(--brand-gradient-action)",
+        background: "var(--primary)",
         color: "#fff",
         marginTop: 1,
       }}

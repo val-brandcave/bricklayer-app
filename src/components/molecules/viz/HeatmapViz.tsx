@@ -42,7 +42,7 @@ export function HeatmapViz({ rows, cols, values, kind = "count", height = 240 }:
   const fmtCell = (v: number) => (kind === "corr" ? fmtR(v) : fmtCount(v));
 
   return (
-    <div style={{ overflowX: "auto", paddingBottom: 4 }}>
+    <div style={{ maxHeight: height, overflowY: "auto", overflowX: "auto", paddingBottom: 4 }}>
       <div style={{ minWidth: 320, minHeight: height - 8 }}>
         {/* header row */}
         <div
