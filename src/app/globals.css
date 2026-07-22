@@ -246,6 +246,20 @@
   animation-delay: calc(var(--i, 0) * 0.12s);
 }
 
+/* Chat MCP-app drag grip — hover-reveal, top-left; mirrors the dashboard tile
+   grip so "drag this" is one consistent affordance. The card header reserves a
+   left gutter so the grip never overlaps the title (no layout shift). */
+.bl-mcp-grip {
+  opacity: 0;
+}
+.bl-mcp-wrap:hover .bl-mcp-grip,
+.bl-mcp-grip:focus-visible {
+  opacity: 1;
+}
+.bl-mcp-card > header {
+  padding-left: 42px !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

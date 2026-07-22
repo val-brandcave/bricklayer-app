@@ -19,6 +19,7 @@ export interface DashboardTemplateProps {
   onRemoveTile: (reportId: string) => void;
   onEditTile?: (reportId: string) => void;
   onTilesChange?: (tiles: Tile[]) => void;
+  onDropReport?: (reportId: string, x: number, y: number, w: number, h: number) => void;
   onAddReport: () => void;
   onNewDashboard: () => void;
 }
@@ -36,6 +37,7 @@ export function DashboardTemplate({
   onRemoveTile,
   onEditTile,
   onTilesChange,
+  onDropReport,
   onAddReport,
   onNewDashboard,
 }: DashboardTemplateProps) {
@@ -99,7 +101,7 @@ export function DashboardTemplate({
         {!isLoading && active && active.tiles.length === 0 ? (
           <EmptyBoard onAddReport={onAddReport} />
         ) : (
-          <DashboardGrid tiles={tiles} loading={isLoading} onRemoveTile={onRemoveTile} onEditTile={onEditTile} onTilesChange={onTilesChange} />
+          <DashboardGrid tiles={tiles} loading={isLoading} onRemoveTile={onRemoveTile} onEditTile={onEditTile} onTilesChange={onTilesChange} onDropReport={onDropReport} />
         )}
       </div>
     </>

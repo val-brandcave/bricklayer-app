@@ -6,6 +6,7 @@ import { GridLayout, type Layout, type LayoutItem } from "react-grid-layout";
 import { Check, GripVertical, Loader2, MoreHorizontal, Pencil, RefreshCw, Trash2 } from "lucide-react";
 import { Menu } from "@/components/molecules/Menu";
 import { useElementSize } from "@/hooks/useElementSize";
+import { useUIStore } from "@/store/ui.store";
 import { widgetSize } from "@/lib/widget-sizing";
 import { fade, fadeUp, staggerContainer } from "@/lib/motion";
 import type { ResolvedTile } from "@/hooks/useDashboards";
@@ -22,6 +23,8 @@ export interface DashboardGridProps {
   onEditTile?: (reportId: string) => void;
   /** Persist a new arrangement after a drag/resize (debounced by the grid). */
   onTilesChange?: (tiles: Tile[]) => void;
+  /** Drop a report dragged from the co-working chat onto the grid → new tile. */
+  onDropReport?: (reportId: string, x: number, y: number, w: number, h: number) => void;
 }
 
 const COLS = 12;
@@ -37,8 +40,9 @@ const SAVE_DEBOUNCE = 650;
    (bottom-right), a faint grid-cell overlay during interaction, a tokenized
    drop-target, and debounced autosave. Each Tile is a fill-mode Widget so its
    visualization sizes to the cell. Narrow widths stack read-only. */
-export function DashboardGrid({ tiles, loading = false, onRemoveTile, onEditTile, onTilesChange }: DashboardGridProps) {
+export function DashboardGrid({ tiles, loading = false, onRemoveTile, onEditTile, onTilesChange, onDropReport }: DashboardGridProps) {
   const [wrapRef, { width }] = useElementSize<HTMLDivElement>();
+  const dragReport = useUIStore((s) => s.dragReport);
   const [layout, setLayout] = useState<LayoutItem[]>(() => toLayout(tiles));
   const [interacting, setInteracting] = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
@@ -170,6 +174,14 @@ export function DashboardGrid({ tiles, loading = false, onRemoveTile, onEditTile
             gridConfig={{ cols: COLS, rowHeight: ROW_HEIGHT, margin: [GAP, GAP], containerPadding: [0, 0] }}
             dragConfig={{ handle: ".bl-tile-grip" }}
             resizeConfig={{ handles: ["se"] }}
+            dropConfig={onDropReport ? { enabled: true, defaultItem: { w: dragReport?.w ?? 6, h: dragReport?.h ?? 3 } } : undefined}
+            onDropDragOver={() => (dragReport ? { w: dragReport.w, h: dragReport.h } : undefined)}
+            onDrop={(_l: Layout, item, e: Event) => {
+              const drag = useUIStore.getState().dragReport;
+              const id = drag?.reportId || (e as DragEvent).dataTransfer?.getData("text/plain") || "";
+              if (id && item && onDropReport) onDropReport(id, item.x, item.y, drag?.w ?? item.w, drag?.h ?? item.h);
+              useUIStore.getState().setDragReport(null);
+            }}
             onLayoutChange={(l: Layout) => setLayout([...l])}
             onDragStart={() => setInteracting(true)}
             onDragStop={(l: Layout) => {

@@ -49,6 +49,14 @@ export default function DashboardsPage() {
     [active, reports, addTile],
   );
 
+  const handleDropReport = useCallback(
+    (reportId: string, x: number, y: number, w: number, h: number) => {
+      if (!active) return;
+      addTile(active.id, { reportId, x, y, w, h });
+    },
+    [active, addTile],
+  );
+
   return (
     <>
       <DashboardTemplate
@@ -60,6 +68,7 @@ export default function DashboardsPage() {
         onToggleFavorite={toggleFavorite}
         onRemoveTile={(reportId) => active && removeTile(active.id, reportId)}
         onTilesChange={(tiles) => active && updateTiles(active.id, tiles)}
+        onDropReport={handleDropReport}
         onAddReport={() => setPickerOpen(true)}
         onNewDashboard={handleNewDashboard}
       />

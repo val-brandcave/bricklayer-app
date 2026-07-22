@@ -41,6 +41,11 @@ interface UIState {
   // the base page label is derived from the route in the TopBar.
   crumb: string | null;
   setCrumb: (crumb: string | null) => void;
+
+  // a chat MCP app being dragged toward a dashboard (drag-to-dashboard);
+  // the grid reads its size to preview the drop. Null when not dragging.
+  dragReport: { reportId: string; w: number; h: number } | null;
+  setDragReport: (drag: UIState["dragReport"]) => void;
 }
 
 function readNavCollapsed(): boolean {
@@ -117,4 +122,7 @@ export const useUIStore = create<UIState>((set, get) => ({
 
   crumb: null,
   setCrumb: (crumb) => set({ crumb }),
+
+  dragReport: null,
+  setDragReport: (dragReport) => set({ dragReport }),
 }));

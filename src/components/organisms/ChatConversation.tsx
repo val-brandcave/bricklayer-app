@@ -2,9 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, FileText, ThumbsDown, ThumbsUp } from "lucide-react";
+import { ArrowRight, FileText, GripVertical, ThumbsDown, ThumbsUp } from "lucide-react";
 import { EmblemMark } from "@/components/atoms/EmblemMark";
+import { Tooltip } from "@/components/atoms/Tooltip";
 import { Widget } from "@/components/organisms/Widget";
+import { useUIStore } from "@/store/ui.store";
+import { widgetSize } from "@/lib/widget-sizing";
 import { fadeUp } from "@/lib/motion";
 import type { Report } from "@/types";
 import type { Explanation } from "@/lib/explain";
@@ -68,6 +71,7 @@ function UserTurn({ text }: { text: string }) {
 }
 
 function AssistantTurn({ message, onSave, onEdit, onDig, onCta, dense }: { message: ResolvedMessage; onSave: (r: Report) => void; onEdit: (r: Report) => void; onDig?: (t: string) => void; onCta?: (e: Explanation) => void; dense: boolean }) {
+  const cardRef = useRef<HTMLDivElement>(null);
   return (
     <motion.div variants={fadeUp} initial="hidden" animate="visible" style={{ display: "flex", gap: dense ? 9 : 12, alignItems: "flex-start" }}>
       <Avatar />
@@ -77,14 +81,62 @@ function AssistantTurn({ message, onSave, onEdit, onDig, onCta, dense }: { messa
         {message.explanation && <ExplanationCard explanation={message.explanation} onDig={onDig} onCta={onCta} />}
 
         {message.report && (
-          <div style={{ maxWidth: dense ? "100%" : 560 }}>
-            <Widget report={message.report} frame="mcp" onSave={onSave} onEdit={onEdit} />
+          <div ref={cardRef} className="bl-mcp-wrap" style={{ maxWidth: dense ? "100%" : 560, position: "relative" }}>
+            <Widget report={message.report} frame="mcp" className="bl-mcp-card" onSave={onSave} onEdit={onEdit} />
+            {/* From the dock, drag the MCP app straight onto the dashboard beside it.
+                Hover-reveal, top-left — same affordance as a dashboard tile's grip. */}
+            {dense && <McpDragHandle report={message.report} cardRef={cardRef} />}
           </div>
         )}
 
         <Feedback />
       </div>
     </motion.div>
+  );
+}
+
+/* Drag handle on a docked MCP app → drop it as a tile on the dashboard on
+   screen. The whole card is used as the drag image; the grid previews + places
+   it. If no dashboard grid is on screen, the drop simply does nothing. */
+function McpDragHandle({ report, cardRef }: { report: Report; cardRef: React.RefObject<HTMLDivElement | null> }) {
+  const setDragReport = useUIStore((s) => s.setDragReport);
+  const [w, h] = widgetSize(report.widgetType).def;
+  return (
+    <Tooltip label="Drag onto a dashboard" side="bottom">
+      <button
+        type="button"
+        className="bl-mcp-grip"
+        draggable
+        aria-label="Drag onto a dashboard"
+        onDragStart={(e) => {
+          e.dataTransfer.effectAllowed = "copy";
+          e.dataTransfer.setData("text/plain", report.id);
+          if (cardRef.current) e.dataTransfer.setDragImage(cardRef.current, 24, 20);
+          setDragReport({ reportId: report.id, w, h });
+        }}
+        onDragEnd={() => setDragReport(null)}
+        style={{
+          position: "absolute",
+          top: 8,
+          left: 8,
+          zIndex: 3,
+          display: "grid",
+          placeItems: "center",
+          width: 26,
+          height: 26,
+          borderRadius: "var(--r-sm)",
+          border: "1px solid var(--hairline)",
+          background: "var(--surface)",
+          color: "var(--faint)",
+          cursor: "grab",
+          transition: "color var(--dur), background var(--dur), border-color var(--dur), opacity var(--dur)",
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.color = "var(--primary)"; e.currentTarget.style.borderColor = "var(--primary)"; e.currentTarget.style.background = "var(--primary-soft)"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.color = "var(--faint)"; e.currentTarget.style.borderColor = "var(--hairline)"; e.currentTarget.style.background = "var(--surface)"; }}
+      >
+        <GripVertical size={15} strokeWidth={2} aria-hidden />
+      </button>
+    </Tooltip>
   );
 }
 

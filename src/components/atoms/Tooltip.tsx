@@ -88,12 +88,10 @@ export function Tooltip({ label, side = "right", offset = 10, disabled, children
         createPortal(
           <AnimatePresence>
             {pos && (
-              <motion.span
-                role="tooltip"
-                initial={{ opacity: 0, scale: 0.94, x: enterX, y: enterY }}
-                animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
-                exit={{ opacity: 0, scale: 0.94, x: enterX, y: enterY }}
-                transition={{ duration: 0.13, ease: [0.16, 1, 0.3, 1] }}
+              // Outer element owns the fixed position + centering transform (static,
+              // so Framer's x/y entrance animation on the inner span can't override
+              // it — that override was shifting tooltips off-center).
+              <div
                 style={{
                   position: "fixed",
                   left: pos.left,
@@ -101,20 +99,32 @@ export function Tooltip({ label, side = "right", offset = 10, disabled, children
                   transform: `translate(${pos.tx}, ${pos.ty})`,
                   zIndex: 90,
                   pointerEvents: "none",
-                  background: "var(--ink)",
-                  color: "var(--surface)",
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  lineHeight: 1,
-                  whiteSpace: "nowrap",
-                  padding: "7px 10px",
-                  borderRadius: "var(--r-sm)",
-                  boxShadow: "var(--shadow-md)",
                 }}
               >
-                <span style={caret} aria-hidden />
-                <span style={{ position: "relative" }}>{label}</span>
-              </motion.span>
+                <motion.span
+                  role="tooltip"
+                  initial={{ opacity: 0, scale: 0.94, x: enterX, y: enterY }}
+                  animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.94, x: enterX, y: enterY }}
+                  transition={{ duration: 0.13, ease: [0.16, 1, 0.3, 1] }}
+                  style={{
+                    display: "inline-block",
+                    position: "relative",
+                    background: "var(--ink)",
+                    color: "var(--surface)",
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    lineHeight: 1,
+                    whiteSpace: "nowrap",
+                    padding: "7px 10px",
+                    borderRadius: "var(--r-sm)",
+                    boxShadow: "var(--shadow-md)",
+                  }}
+                >
+                  <span style={caret} aria-hidden />
+                  <span style={{ position: "relative" }}>{label}</span>
+                </motion.span>
+              </div>
             )}
           </AnimatePresence>,
           document.body,

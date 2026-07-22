@@ -115,21 +115,30 @@ export function ChartFrame({
         {loading ? <ChartSkeleton height={fill ? "100%" : bodyHeight} /> : renderChildren()}
       </div>
 
-      {/* footer */}
+      {/* footer — single row for tiles (provenance ellipsizes); the MCP frame
+          with actions stacks provenance above the buttons so a narrow chat app
+          keeps the source readable and never crowds Save/Edit onto two lines. */}
       {(provenance || footer) && !loading && (
         <footer
           style={{
             display: "flex",
-            alignItems: "center",
+            flexDirection: isMcp && footer ? "column" : "row",
+            alignItems: isMcp && footer ? "stretch" : "center",
             justifyContent: "space-between",
-            gap: "var(--s-3)",
+            gap: "var(--s-2)",
             padding: "var(--s-3) var(--s-4)",
             marginTop: "var(--s-3)",
             borderTop: bare ? "none" : "1px solid var(--hairline-2)",
           }}
         >
-          {provenance ? <ProvenanceLine provenance={provenance} /> : <span />}
-          {footer && <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>{footer}</div>}
+          {provenance ? (
+            <div style={{ flex: isMcp && footer ? "none" : 1, minWidth: 0 }}>
+              <ProvenanceLine provenance={provenance} />
+            </div>
+          ) : (
+            !(isMcp && footer) && <span />
+          )}
+          {footer && <div style={{ display: "flex", gap: 8, flexShrink: 0, justifyContent: "flex-end" }}>{footer}</div>}
         </footer>
       )}
     </motion.section>
