@@ -1,0 +1,137 @@
+<title>Full-page chat — background style options</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --studio:#0e0f14; --studio-2:#16181f; --edge:#262a33; --edge-2:#1d2027;
+    --label:#e8eaf0; --dim:#9aa0b0; --faint:#6b7180; --accent:#8e7bf2; --good:#3fd07f;
+    /* app tokens — LIGHT */
+    --l-canvas:#f7f8fc; --l-surface:#ffffff; --l-hairline:#e2e5f0; --l-ink:#171d3d; --l-muted:#767d9c; --l-primary:#653ed3; --l-soft:#eeeafb;
+    /* app tokens — DARK */
+    --d-canvas:#0c0e1a; --d-surface:#14172a; --d-hairline:#282d48; --d-ink:#f5f6fc; --d-muted:#888fb0; --d-primary:#9b86f5; --d-soft:#24223f;
+    --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1000px 600px at 85% -10%, rgba(142,123,242,.10), transparent 60%), var(--studio);
+    color:var(--label);font-family:var(--font);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 26px}
+  h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.02em}
+  h1{font-size:clamp(28px,4vw,42px);font-weight:640}
+  .head{padding:56px 0 26px}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+  .lead{color:var(--dim);font-size:17px;max-width:74ch;margin-top:16px}
+  .lead b{color:var(--label)}
+
+  .opt{padding:30px 0;border-top:1px solid var(--edge-2)}
+  .opt-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+  .badge{font-size:11px;font-weight:700;letter-spacing:.05em;color:#0e0f14;background:var(--accent);border-radius:6px;padding:2px 8px}
+  .badge.rec{background:var(--good)} .badge.safe{background:#5aa9ff}
+  .opt h3{font-size:19px}
+  .opt p.desc{color:var(--dim);font-size:14px;margin:6px 0 0;max-width:78ch}
+  .feel{color:var(--faint);font-size:12.5px;font-style:italic;margin-top:3px}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+  @media(max-width:820px){.pair{grid-template-columns:1fr}}
+  .frame{border:1px solid var(--edge);border-radius:14px;overflow:hidden;box-shadow:0 14px 40px rgba(0,0,0,.45)}
+  .frame .cap{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--faint);padding:8px 12px;background:var(--studio-2);border-bottom:1px solid var(--edge)}
+  .frame .cap .sw{width:9px;height:9px;border-radius:50%}
+
+  .mock{position:relative;height:284px;padding:26px 22px 0;display:flex;flex-direction:column;align-items:center;overflow:hidden}
+  .mock .title{font-size:19px;font-weight:680;letter-spacing:-.02em;margin-top:6px}
+  .mock .sub{font-size:12px;margin-top:6px;text-align:center;max-width:34ch;line-height:1.45}
+  .mock .cards{width:100%;max-width:380px;margin-top:16px;display:flex;flex-direction:column;gap:9px}
+  .mock .row{display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:9px;font-size:12.5px;font-weight:550}
+  .mock .row .ic{width:22px;height:22px;border-radius:6px;flex:0 0 auto}
+  .mock .composer{position:absolute;left:22px;right:22px;bottom:16px;height:42px;border-radius:12px;display:flex;align-items:center;padding:0 14px;font-size:12.5px}
+  .light .title{color:var(--l-ink)} .light .sub{color:var(--l-muted)}
+  .light .row{background:var(--l-surface);border:1px solid var(--l-hairline);color:var(--l-ink)} .light .row .ic{background:var(--l-soft)}
+  .light .composer{background:var(--l-surface);border:1px solid var(--l-hairline);color:var(--l-muted)}
+  .dark .title{color:var(--d-ink)} .dark .sub{color:var(--d-muted)}
+  .dark .row{background:var(--d-surface);border:1px solid var(--d-hairline);color:var(--d-ink)} .dark .row .ic{background:var(--d-soft)}
+  .dark .composer{background:var(--d-surface);border:1px solid var(--d-hairline);color:var(--d-muted)}
+
+  /* ============ the background styles ============ */
+  /* 1 · dots */
+  .bg-dots-l{background:radial-gradient(circle at 1px 1px, rgba(23,29,61,.06) 1px, transparent 0) 0 0/22px 22px, var(--l-canvas)}
+  .bg-dots-d{background:radial-gradient(circle at 1px 1px, rgba(255,255,255,.05) 1px, transparent 0) 0 0/22px 22px, var(--d-canvas)}
+  /* 2 · brick lattice (on-brand) */
+  .bg-brick-l{background:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='48'%20height='32'%3E%3Cg%20fill='none'%20stroke='%23171d3d'%20stroke-opacity='0.08'%3E%3Cpath%20d='M0%200.5H48M0%2016.5H48M0.5%200V16M24.5%200V16M12.5%2016V32M36.5%2016V32'/%3E%3C/g%3E%3C/svg%3E"), var(--l-canvas)}
+  .bg-brick-d{background:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='48'%20height='32'%3E%3Cg%20fill='none'%20stroke='%23ffffff'%20stroke-opacity='0.06'%3E%3Cpath%20d='M0%200.5H48M0%2016.5H48M0.5%200V16M24.5%200V16M12.5%2016V32M36.5%2016V32'/%3E%3C/g%3E%3C/svg%3E"), var(--d-canvas)}
+  /* 3 · aurora mesh */
+  .bg-aurora-l{background:radial-gradient(52% 46% at 20% 10%, rgba(101,62,211,.08), transparent 70%),radial-gradient(50% 42% at 84% 20%, rgba(182,92,238,.06), transparent 72%),radial-gradient(46% 50% at 62% 96%, rgba(101,62,211,.05), transparent 70%), var(--l-canvas)}
+  .bg-aurora-d{background:radial-gradient(52% 46% at 20% 10%, rgba(101,62,211,.20), transparent 70%),radial-gradient(50% 42% at 84% 20%, rgba(182,92,238,.15), transparent 72%),radial-gradient(46% 50% at 62% 96%, rgba(101,62,211,.12), transparent 70%), var(--d-canvas)}
+  /* 4 · blueprint grid */
+  .bg-blue-l{background:repeating-linear-gradient(0deg, rgba(23,29,61,.05) 0 1px, transparent 1px 26px),repeating-linear-gradient(90deg, rgba(23,29,61,.05) 0 1px, transparent 1px 26px), var(--l-canvas)}
+  .bg-blue-d{background:repeating-linear-gradient(0deg, rgba(255,255,255,.045) 0 1px, transparent 1px 26px),repeating-linear-gradient(90deg, rgba(255,255,255,.045) 0 1px, transparent 1px 26px), var(--d-canvas)}
+  /* 5 · concentric rings from the hero */
+  .bg-rings-l{background:repeating-radial-gradient(circle at 50% 6%, transparent 0 42px, rgba(23,29,61,.038) 42px 43px), var(--l-canvas)}
+  .bg-rings-d{background:repeating-radial-gradient(circle at 50% 6%, transparent 0 42px, rgba(255,255,255,.04) 42px 43px), var(--d-canvas)}
+  /* 6 · film grain */
+  .bg-grain-l{background:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='160'%20height='160'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.9'%20numOctaves='2'%20stitchTiles='stitch'/%3E%3C/filter%3E%3Crect%20width='100%25'%20height='100%25'%20filter='url(%23n)'%20opacity='0.22'/%3E%3C/svg%3E"), var(--l-canvas)}
+  .bg-grain-d{background:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='160'%20height='160'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.9'%20numOctaves='2'%20stitchTiles='stitch'/%3E%3C/filter%3E%3Crect%20width='100%25'%20height='100%25'%20filter='url(%23n)'%20opacity='0.28'/%3E%3C/svg%3E"), var(--d-canvas)}
+
+  .snippet{margin-top:14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:var(--dim);
+    background:var(--studio-2);border:1px solid var(--edge-2);border-radius:8px;padding:10px 13px;overflow-x:auto;white-space:pre;line-height:1.5}
+  .snippet b{color:var(--accent);font-weight:600}
+  .rec{display:flex;gap:14px;border:1px solid rgba(63,208,127,.4);background:rgba(63,208,127,.06);border-radius:11px;padding:15px 18px;margin:22px 0 8px}
+  .rec .k{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--good);flex:0 0 84px;padding-top:2px}
+  .rec p{margin:0;color:var(--label);font-size:14.5px} .rec b{color:#fff}
+  footer{padding:34px 0;border-top:1px solid var(--edge-2);color:var(--faint);font-size:13px;margin-top:20px}
+</style>
+
+<header class="wrap head">
+  <div class="eyebrow">Full-page chat · background study</div>
+  <h1>Six ways to make the canvas its own</h1>
+  <p class="lead">The empty-state of the full-page chat is prime real estate for a little character. Here are six treatments — geometric, atmospheric, textural — all kept <b>whisper-subtle</b> (it's still a bank tool) and shown on the app's real palette in both themes. They live <b>only on the chat canvas</b>, never on dashboards or behind data.</p>
+  <div class="rec"><span class="k">My take</span><p><b>Dots</b> are the safe standard — genuinely hard to get wrong. But since you want interesting, there's an obvious ownable move: <b>the brick lattice (Option 2)</b> quietly echoes the Bricklayer emblem — personality without noise. If you'd rather have mood than geometry, <b>Aurora (3)</b>. Any of these can pair with the composer-fade idea from before, and all respect reduced-motion (they're static).</p></div>
+</header>
+
+<main class="wrap" id="opts"></main>
+<footer class="wrap">Bricklayer · full-page chat background study · applies via <b style="color:var(--dim)">tokens.css</b> on the chat canvas only · both themes</footer>
+
+<script>
+  const OPTIONS = [
+    { n:"1", tag:"Standard", cls:"safe", name:"Dot grid", feel:"calm · neutral · the reference",
+      desc:"A uniform 22px dot grid at very low opacity — the literal read of most AI-chat empty states. Impossible to get wrong; also the least distinctive.",
+      l:"bg-dots-l", d:"bg-dots-d",
+      code:"radial-gradient(circle at 1px 1px, var(--dot) 1px, transparent 0) 0 0/22px 22px, var(--canvas);" },
+    { n:"2", tag:"Recommended · on-brand", cls:"rec", name:"Brick lattice", feel:"ownable · architectural · quietly on-brand",
+      desc:"A faint offset-brick wireframe echoing the emblem's courses. It reads as texture, not decoration, and it's unmistakably Bricklayer — the kind of detail a discerning client notices.",
+      l:"bg-brick-l", d:"bg-brick-d",
+      code:"url(\"data:image/svg+xml,…offset 24×16 brick, stroke var(--ink)/white @ ~7%…\"), var(--canvas);" },
+    { n:"3", tag:"Atmospheric", cls:"", name:"Aurora mesh", feel:"soft · modern · depth without geometry",
+      desc:"Blurred brand-tint blooms drifting across the canvas — no pattern, just atmosphere. The contemporary copilot look; strongest in dark, gentle in light.",
+      l:"bg-aurora-l", d:"bg-aurora-d",
+      code:"radial-gradient(52% 46% at 20% 10%, var(--brand-a), transparent 70%), …, var(--canvas);" },
+    { n:"4", tag:"Architectural", cls:"", name:"Blueprint grid", feel:"precise · CRE / drafting-table",
+      desc:"Thin ruled lines like graph paper — a nod to floor plans and appraisal drawings. More structured than dots; can feel busy if opacity creeps up.",
+      l:"bg-blue-l", d:"bg-blue-d",
+      code:"repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 26px), repeating-linear-gradient(90deg, …), var(--canvas);" },
+    { n:"5", tag:"Focus", cls:"", name:"Concentric rings", feel:"directional · centres attention",
+      desc:"Faint rings radiating from behind the hero, pulling the eye to “How can Bricklayer help?”. A subtle spotlight; fades to nothing at the edges.",
+      l:"bg-rings-l", d:"bg-rings-d",
+      code:"repeating-radial-gradient(circle at 50% 6%, transparent 0 42px, var(--ring) 42px 43px), var(--canvas);" },
+    { n:"6", tag:"Textural", cls:"", name:"Film grain", feel:"tactile · warm · least ‘digital’",
+      desc:"A barely-there fractal-noise grain — softens the flatness without any shape. Atmospheric, but the least ‘precise’; use the lowest opacity that still reads.",
+      l:"bg-grain-l", d:"bg-grain-d",
+      code:"url(\"data:image/svg+xml,…feTurbulence fractalNoise @ ~22–28% opacity…\"), var(--canvas);" },
+  ];
+  const rows = `<div class="row"><span class="ic"></span>Where is my book most concentrated?</div><div class="row"><span class="ic"></span>Which valuations are going stale?</div>`;
+  const mock = (themeCls, bgCls) => `<div class="mock ${themeCls} ${bgCls}">
+      <div class="title">How can Bricklayer help today?</div>
+      <div class="sub">Ask about concentration, staleness, or risk across the $6.51B book.</div>
+      <div class="cards">${rows}</div>
+      <div class="composer">Ask Bricklayer about your book…</div>
+    </div>`;
+  document.getElementById("opts").innerHTML = OPTIONS.map((o) => `
+    <section class="opt">
+      <div class="opt-head"><span class="badge ${o.cls}">${o.n} · ${o.tag}</span><h3>${o.name}</h3></div>
+      <div class="feel">${o.feel}</div>
+      <p class="desc">${o.desc}</p>
+      <div class="pair">
+        <div class="frame"><div class="cap"><span class="sw" style="background:var(--l-hairline)"></span>Light</div>${mock("light", o.l)}</div>
+        <div class="frame"><div class="cap"><span class="sw" style="background:var(--d-primary)"></span>Dark</div>${mock("dark", o.d)}</div>
+      </div>
+      <div class="snippet">background: <b>${o.code}</b></div>
+    </section>`).join("");
+</script>
