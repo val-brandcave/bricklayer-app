@@ -30,7 +30,9 @@ const SIZING: Partial<Record<WidgetType, WidgetSize>> = {
   line: { min: [4, 2], def: [6, 3] },
   area: { min: [4, 2], def: [6, 3] },
   scatter: { min: [4, 3], def: [6, 4] },
-  heatmap: { min: [4, 3], def: [6, 4] },
+  // a 6-row correlation matrix + header needs 4 rows of height or the last row
+  // and the provenance footer collide when shrunk
+  heatmap: { min: [4, 4], def: [6, 4] },
   // dense, data-heavy surfaces need width + height
   table: { min: [5, 3], def: [12, 4] },
   watchlist: { min: [4, 3], def: [6, 4] },

@@ -43,8 +43,11 @@ export function KpiViz({ value, prefix, suffix, decimals = 0, delta, caption, he
         justifyContent: "center",
         alignItems: "flex-start",
         gap: "var(--s-3)",
-        minHeight: height,
-        paddingBottom: "var(--s-4)",
+        // Size to the tile's measured body (not a min that can grow past it):
+        // clip rather than bleed over the footer when a tile is resized short.
+        height,
+        overflow: "hidden",
+        paddingBottom: "var(--s-2)",
       }}
     >
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
