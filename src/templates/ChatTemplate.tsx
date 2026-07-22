@@ -35,7 +35,7 @@ export function ChatTemplate({ data, collapsed, onToggleCollapse, onSave, onEdit
   };
 
   return (
-    <div style={{ display: "flex", height: `calc(100dvh - ${TOP}px)`, background: "var(--canvas)", overflow: "hidden" }}>
+    <div style={{ display: "flex", height: `calc(100dvh - ${TOP}px)`, backgroundColor: "var(--canvas)", backgroundImage: "var(--chat-texture)", overflow: "hidden" }}>
       <ChatThreadRail
         threads={recentThreads}
         activeThreadId={activeThreadId}
