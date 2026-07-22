@@ -31,3 +31,6 @@ yarn-error.log*
 
 # reserved windows device file guard
 nul
+
+# local-only planning (kept on disk, never pushed; survives checkout/pull as an ignored untracked file)
+/docs/ROADMAP.md

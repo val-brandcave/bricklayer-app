@@ -4,6 +4,8 @@ import { create } from "zustand";
 import { generateId } from "@/types";
 import type { Report } from "@/types";
 import { routePrompt } from "@/lib/chat-router";
+import { buildExplanation, requestText, type Explanation, type ExplainInput } from "@/lib/explain";
+import { useUIStore } from "./ui.store";
 import { latency } from "./latency";
 
 /* Chat state — the conversation surface shared by the full-page chat and the
@@ -18,6 +20,8 @@ export interface ChatMessage {
   text: string;
   /** an MCP app to render beneath the text (assistant only) */
   reportId?: string;
+  /** a scoped "Explain this" reasoning card (assistant only) */
+  explanation?: Explanation;
   createdAt: number;
 }
 
@@ -37,6 +41,8 @@ interface ChatState {
   newThread: () => string;
   selectThread: (id: string) => void;
   sendMessage: (text: string, reports: Report[]) => Promise<void>;
+  /** "Explain this" — opens the dock and drops a scoped reasoning turn. */
+  explain: (input: ExplainInput) => Promise<void>;
 }
 
 const NEW_TITLE = "New chat";
@@ -133,6 +139,42 @@ export const useChatStore = create<ChatState>((set, get) => ({
       createdAt: Date.now(),
     };
 
+    set((s) => ({
+      threads: s.threads.map((t) => (t.id === activeId ? { ...t, messages: [...t.messages, aiMsg], updatedAt: Date.now() } : t)),
+      thinking: false,
+    }));
+  },
+
+  explain: async (input) => {
+    if (get().thinking) return;
+
+    // summon the docked assistant, scoped to what was selected
+    useUIStore.getState().openChat(input.contextLabel ?? "Explain this");
+
+    // ensure an active thread
+    let activeId = get().activeThreadId;
+    if (!activeId || !get().threads.some((t) => t.id === activeId)) {
+      const t = emptyThread();
+      set((s) => ({ threads: [t, ...s.threads] }));
+      activeId = t.id;
+      set({ activeThreadId: activeId });
+    }
+
+    const now = Date.now();
+    const userMsg: ChatMessage = { id: generateId(), role: "user", text: requestText(input.kind, input.text), createdAt: now };
+    set((s) => ({
+      threads: s.threads.map((t) => {
+        if (t.id !== activeId) return t;
+        const title = t.messages.length === 0 || t.title === NEW_TITLE ? deriveTitle(userMsg.text) : t.title;
+        return { ...t, title, messages: [...t.messages, userMsg], updatedAt: now };
+      }),
+      thinking: true,
+    }));
+
+    await latency(1150, 350);
+
+    const explanation = buildExplanation(input);
+    const aiMsg: ChatMessage = { id: generateId(), role: "assistant", text: "", explanation, createdAt: Date.now() };
     set((s) => ({
       threads: s.threads.map((t) => (t.id === activeId ? { ...t, messages: [...t.messages, aiMsg], updatedAt: Date.now() } : t)),
       thinking: false,

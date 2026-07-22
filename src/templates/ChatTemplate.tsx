@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { EmblemMark } from "@/components/atoms/EmblemMark";
 import { ChatComposer } from "@/components/molecules/ChatComposer";
 import { ChatSuggestions } from "@/components/molecules/ChatSuggestions";
@@ -27,6 +28,10 @@ export interface ChatTemplateProps {
    renders, here with Save / Edit. Built to the scientist.com reference. */
 export function ChatTemplate({ data, collapsed, onToggleCollapse, onSave, onEdit }: ChatTemplateProps) {
   const { recentThreads, activeThread, activeThreadId, thinking, isEmpty, search, setSearch, sendMessage, newThread, selectThread } = data;
+  const router = useRouter();
+  const onCta = (e: import("@/lib/explain").Explanation) => {
+    if (e.ctaAction === "workspace") router.push("/properties");
+  };
 
   return (
     <div style={{ display: "flex", height: `calc(100dvh - ${TOP}px)`, background: "var(--canvas)", overflow: "hidden" }}>
@@ -48,7 +53,7 @@ export function ChatTemplate({ data, collapsed, onToggleCollapse, onSave, onEdit
             <NullState onPick={sendMessage} />
           ) : (
             <div style={{ width: "100%", maxWidth: COLUMN, margin: "0 auto", padding: `var(--s-6) var(--s-6) var(--s-8)` }}>
-              <ChatConversation messages={activeThread!.messages} thinking={thinking} onSave={onSave} onEdit={onEdit} />
+              <ChatConversation messages={activeThread!.messages} thinking={thinking} onSave={onSave} onEdit={onEdit} onDig={sendMessage} onCta={onCta} />
             </div>
           )}
         </div>

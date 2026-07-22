@@ -97,7 +97,7 @@ export function StatTile({
       {loading ? (
         <Skeleton width="55%" height={30} radius="var(--r-sm)" />
       ) : (
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+        <div data-kind="number" data-name={label} style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
           <KpiValue value={value} prefix={prefix} suffix={suffix} decimals={decimals} size={30} />
           {delta && (
             <span

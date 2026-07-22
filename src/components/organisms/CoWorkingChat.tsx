@@ -31,9 +31,15 @@ export function CoWorkingChat() {
   const router = useRouter();
 
   const { recentThreads, activeThread, activeThreadId, thinking, isEmpty, search, setSearch, sendMessage, newThread, selectThread } = useChat();
-  const { lens, editing, openEdit, closeEdit, toast, saveReport, forkReport } = useChatActions();
+  const { lens, editing, openEdit, closeEdit, toast, flash, saveReport, forkReport } = useChatActions();
 
   const [threadsOpen, setThreadsOpen] = useState(false);
+
+  const onExplainCta = (e: import("@/lib/explain").Explanation) => {
+    if (e.ctaAction === "workspace") { close(); router.push("/properties"); }
+    else if (e.ctaAction === "dashboard") flash("Pinned to your dashboard");
+    else flash("Opening the report builder…");
+  };
 
   const promote = () => {
     close();
@@ -101,7 +107,7 @@ export function CoWorkingChat() {
               {isEmpty ? (
                 <DockWelcome onPick={sendMessage} />
               ) : (
-                <ChatConversation messages={activeThread!.messages} thinking={thinking} onSave={saveReport} onEdit={openEdit} dense />
+                <ChatConversation messages={activeThread!.messages} thinking={thinking} onSave={saveReport} onEdit={openEdit} onDig={sendMessage} onCta={onExplainCta} dense />
               )}
             </div>
 

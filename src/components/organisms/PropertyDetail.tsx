@@ -76,7 +76,7 @@ export function PropertyDetail({ row, onBack, onAskAbout }: PropertyDetailProps)
         <div style={{ minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <h1 style={{ fontSize: 27, fontWeight: 720, lineHeight: 1.1, margin: 0 }}>{p.name}</h1>
-            <Pill tone="neutral" size="md">{CLASS_LABEL[p.assetClass]}</Pill>
+            <span data-kind="category" data-name={CLASS_LABEL[p.assetClass]}><Pill tone="neutral" size="md">{CLASS_LABEL[p.assetClass]}</Pill></span>
             <Pill tone={status.tone} size="md" dot>{status.label} · {p.monthsSinceValuation}mo</Pill>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap", marginTop: 10, fontSize: 13.5, color: "var(--muted)" }}>

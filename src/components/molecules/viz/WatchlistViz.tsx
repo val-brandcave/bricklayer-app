@@ -25,6 +25,10 @@ export function WatchlistViz({ items, height = 240 }: WatchlistVizProps) {
         <motion.div
           key={it.id}
           variants={staggerItem}
+          data-kind="property"
+          data-name={it.propertyName}
+          data-location={it.location}
+          data-reasons={it.reasons.slice(0, 3).join("|")}
           style={{
             display: "flex",
             alignItems: "center",

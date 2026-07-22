@@ -45,7 +45,7 @@ export function InsightsFocusPanel({ insight, onFollowUp, onOpenReport, onDismis
               <FindingCardHeader title={insight.title} kind={insight.kind} severity={insight.severity} isSurprisingLink={insight.isSurprisingLink} />
             </motion.div>
 
-            <motion.p variants={staggerItem} style={{ fontSize: 15, color: "var(--body)", lineHeight: 1.6, margin: 0 }}>
+            <motion.p variants={staggerItem} data-kind="claim" style={{ fontSize: 15, color: "var(--body)", lineHeight: 1.6, margin: 0 }}>
               {insight.claim}
             </motion.p>
 

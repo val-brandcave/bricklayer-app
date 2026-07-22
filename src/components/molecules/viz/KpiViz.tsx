@@ -35,6 +35,8 @@ function deltaColor(d: KpiDelta): string {
 export function KpiViz({ value, prefix, suffix, decimals = 0, delta, caption, height = 240 }: KpiVizProps) {
   return (
     <div
+      data-kind="number"
+      data-name={caption || undefined}
       style={{
         display: "flex",
         flexDirection: "column",

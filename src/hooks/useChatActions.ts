@@ -71,5 +71,5 @@ export function useChatActions() {
     [lens, createReport, flash],
   );
 
-  return { lens, editing, openEdit: setEditing, closeEdit: () => setEditing(null), toast, saveReport, forkReport } as const;
+  return { lens, editing, openEdit: setEditing, closeEdit: () => setEditing(null), toast, flash, saveReport, forkReport } as const;
 }

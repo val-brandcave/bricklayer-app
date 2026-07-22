@@ -7,6 +7,7 @@ import { TopBar } from "./TopBar";
 import { CoWorkingChat } from "./CoWorkingChat";
 import { PageTransition } from "./PageTransition";
 import { SettingsModal } from "./SettingsModal";
+import { ExplainLayer } from "./ExplainLayer";
 import { SummonButton } from "@/components/molecules/SummonButton";
 import { useUIStore } from "@/store/ui.store";
 
@@ -47,6 +48,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       <SettingsModal />
+
+      {/* Global "Explain this" driver — select-to-explain + right-click, everywhere. */}
+      {!isFullChat && <ExplainLayer />}
 
       {/* Floating summon on every page except the full-page chat, and only when the dock is closed. */}
       {!isFullChat && !chatOpen && <SummonButton variant="fab" />}
