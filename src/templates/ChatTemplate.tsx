@@ -35,7 +35,22 @@ export function ChatTemplate({ data, collapsed, onToggleCollapse, onSave, onEdit
   };
 
   return (
-    <div style={{ display: "flex", height: `calc(100dvh - ${TOP}px)`, backgroundColor: "var(--canvas)", backgroundImage: "var(--chat-texture)", overflow: "hidden" }}>
+    <div style={{ position: "relative", isolation: "isolate", display: "flex", height: `calc(100dvh - ${TOP}px)`, backgroundColor: "var(--canvas)", overflow: "hidden" }}>
+      {/* brick-lattice texture on its own layer, masked so it fades out smoothly
+          toward the composer instead of ending in a hard line. Sits behind the
+          rail (opaque) and the conversation (transparent). */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: -1,
+          backgroundImage: "var(--chat-texture)",
+          WebkitMaskImage: "linear-gradient(to bottom, #000 0%, #000 68%, transparent 96%)",
+          maskImage: "linear-gradient(to bottom, #000 0%, #000 68%, transparent 96%)",
+          pointerEvents: "none",
+        }}
+      />
       <ChatThreadRail
         threads={recentThreads}
         activeThreadId={activeThreadId}
@@ -60,7 +75,7 @@ export function ChatTemplate({ data, collapsed, onToggleCollapse, onSave, onEdit
         </div>
 
         {/* composer */}
-        <div style={{ flex: "none", padding: `0 var(--s-6) var(--s-4)`, background: "var(--canvas)" }}>
+        <div style={{ flex: "none", padding: `0 var(--s-6) var(--s-4)` }}>
           <div style={{ width: "100%", maxWidth: COLUMN, margin: "0 auto" }}>
             <ChatComposer onSend={sendMessage} disabled={thinking} autoFocus placeholder="Ask Bricklayer about your book…" />
             <p style={{ textAlign: "center", fontSize: 11.5, color: "var(--faint)", margin: "10px 0 0" }}>Bricklayer can make mistakes — every figure links back to its source.</p>
