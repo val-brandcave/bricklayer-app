@@ -25,7 +25,7 @@ function writeCollection<T>(collection: string, items: T[]): void {
 
 const SEEDED_KEY = `${STORAGE_PREFIX}:__seeded__`;
 /** Bump this to force a re-seed after the fixtures change. */
-const SEED_VERSION = "v3";
+const SEED_VERSION = "v4";
 
 export const mockAdapter: DataAdapter = {
   async getAll<T>(collection: string): Promise<T[]> {

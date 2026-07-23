@@ -154,6 +154,14 @@ export type InsightKind =
 
 export type Severity = "info" | "watch" | "high";
 
+/* The two kinds of insight, distinguished by provenance + trust:
+   - "curated"    → a prescriptive cut of the book (predefined widget). Trusted,
+                    pinnable; the Read is advisory ("what I'd do").
+   - "discovered" → an LLM-found correlation (the "surprising link" / wow).
+                    Provisional; NOT pinned until validated; the Read is
+                    skeptical ("correlation, not proof"). Ed's 28:07 split. */
+export type InsightOrigin = "curated" | "discovered";
+
 export interface Insight extends BaseEntity {
   lens: Lens;
   kind: InsightKind;
@@ -163,8 +171,8 @@ export interface Insight extends BaseEntity {
   evidence: { label: string; value: string; delta?: string }[];
   bricklaysRead: string; // the skeptical AI critique of its own number
   followUps: string[]; // "dig deeper" chips
-  isSurprisingLink: boolean; // LLM-discovered correlation
-  relatedReportId?: UUID;
+  origin: InsightOrigin; // curated finding vs. LLM-discovered surprising link
+  relatedReportId?: UUID; // the chart the Read reasons over
   dismissed?: boolean;
 }
 

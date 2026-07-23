@@ -1,75 +1,71 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { InsightsTemplate } from "@/templates/InsightsTemplate";
-import { ReportPreviewModal } from "@/components/organisms/ReportPreviewModal";
 import { useInsights } from "@/hooks/useInsights";
 import { useReports } from "@/hooks/useReports";
 import { useDashboards } from "@/hooks/useDashboards";
 import { useUIStore } from "@/store";
-import type { Report, Tile } from "@/types";
+import type { Insight, Tile } from "@/types";
 
-/* Insights — the per-lens opinion layer. Master-detail of findings with
-   Bricklayer's self-critique. Follow-ups hand off to the co-working assistant;
-   a finding can open its related report as a live preview. */
+/* Insights — the per-lens opinion layer. Master-detail of the two insight
+   tiers (curated findings + discovered surprising links) with Bricklayer's
+   self-critique over a live chart. Follow-ups and the free-form ask hand off to
+   the co-working assistant; a finding can Pin its chart to the lens board or
+   open the full board; a surprising link only opens the board (scrutinise, not
+   operationalise — see the type model). */
 export default function InsightsPage() {
+  const router = useRouter();
   const lens = useUIStore((s) => s.lens);
   const openChat = useUIStore((s) => s.openChat);
-  const { isLoading, lensInsights, focused, tally, focusInsight, dismissInsight } = useInsights();
+  const { isLoading, findings, links, focused, tally, focusInsight, dismissInsight } = useInsights();
   const { reports } = useReports();
   const { lensDashboards, addTile } = useDashboards();
 
-  const [preview, setPreview] = useState<Report | null>(null);
-
-  const onOpenReport = useCallback(
-    (reportId: string) => {
-      const report = reports.find((r) => r.id === reportId);
-      if (report) setPreview(report);
-    },
-    [reports],
+  // The chart the focused insight's Read reasons over.
+  const focusedReport = useMemo(
+    () => reports.find((r) => r.id === focused?.relatedReportId) ?? null,
+    [reports, focused],
   );
 
   const onFollowUp = useCallback((prompt: string) => openChat(prompt), [openChat]);
+  const onAsk = useCallback((prompt: string) => openChat(prompt), [openChat]);
 
-  const containingIds = useMemo(() => {
-    if (!preview) return new Set<string>();
-    return new Set(lensDashboards.filter((d) => d.tiles.some((t) => t.reportId === preview.id)).map((d) => d.id));
-  }, [preview, lensDashboards]);
+  // "Open full board" → the lens's default dashboard.
+  const onOpenBoard = useCallback(() => router.push("/dashboards"), [router]);
 
-  const handleAddToDashboard = useCallback(
-    (dashboardId: string) => {
-      if (!preview) return;
-      const dash = lensDashboards.find((d) => d.id === dashboardId);
-      const w = preview.widgetType === "kpi" || preview.widgetType === "gauge" ? 3 : 6;
-      const h = preview.widgetType === "scenario" ? 4 : 3;
-      const nextY = dash ? dash.tiles.reduce((max, t) => Math.max(max, t.y + t.h), 0) : 0;
-      const tile: Tile = { reportId: preview.id, x: 0, y: nextY, w, h };
-      addTile(dashboardId, tile);
+  // "Pin to board" (curated findings only) → append the insight's chart as a
+  // tile on the lens's default board, sizing by widget type as the grid does.
+  const onPin = useCallback(
+    (insight: Insight) => {
+      const board = lensDashboards.find((d) => d.isDefault) ?? lensDashboards[0];
+      const report = reports.find((r) => r.id === insight.relatedReportId);
+      if (!board || !report) return;
+      const w = report.widgetType === "kpi" || report.widgetType === "gauge" ? 3 : 6;
+      const h = report.widgetType === "scenario" ? 4 : 3;
+      const nextY = board.tiles.reduce((max, t) => Math.max(max, t.y + t.h), 0);
+      const tile: Tile = { reportId: report.id, x: 0, y: nextY, w, h };
+      addTile(board.id, tile);
     },
-    [preview, lensDashboards, addTile],
+    [lensDashboards, reports, addTile],
   );
 
   return (
-    <>
-      <InsightsTemplate
-        isLoading={isLoading}
-        lens={lens}
-        lensInsights={lensInsights}
-        focused={focused}
-        tally={tally}
-        onFocus={focusInsight}
-        onFollowUp={onFollowUp}
-        onOpenReport={onOpenReport}
-        onDismiss={dismissInsight}
-      />
-      <ReportPreviewModal
-        report={preview}
-        onClose={() => setPreview(null)}
-        dashboards={lensDashboards}
-        containingIds={containingIds}
-        onAddToDashboard={handleAddToDashboard}
-        onEdit={() => {}}
-      />
-    </>
+    <InsightsTemplate
+      isLoading={isLoading}
+      lens={lens}
+      findings={findings}
+      links={links}
+      focused={focused}
+      focusedReport={focusedReport}
+      tally={tally}
+      onFocus={focusInsight}
+      onFollowUp={onFollowUp}
+      onAsk={onAsk}
+      onOpenBoard={onOpenBoard}
+      onPin={onPin}
+      onDismiss={dismissInsight}
+    />
   );
 }

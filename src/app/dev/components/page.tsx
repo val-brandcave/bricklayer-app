@@ -201,7 +201,7 @@ export default function ComponentGalleryPage() {
             { title: "Flood-zone AE tracks appraiser workload — an unexpected link", kind: "correlation", severity: "watch", link: true },
           ] as const).map((f) => (
             <div key={f.title} style={{ background: "var(--surface)", border: "1px solid var(--hairline)", borderRadius: "var(--r-lg)", padding: "var(--s-5)", boxShadow: "var(--shadow-sm)" }}>
-              <FindingCardHeader title={f.title} kind={f.kind} severity={f.severity} isSurprisingLink={f.link} />
+              <FindingCardHeader title={f.title} kind={f.kind} severity={f.severity} origin={f.link ? "discovered" : "curated"} />
             </div>
           ))}
         </div>

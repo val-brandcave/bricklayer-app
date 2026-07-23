@@ -26,30 +26,37 @@ export function useInsights() {
     () =>
       insights
         .filter((i) => i.lens === lens && !i.dismissed)
-        .sort((a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity] || Number(b.isSurprisingLink) - Number(a.isSurprisingLink)),
+        .sort((a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity]),
     [insights, lens],
   );
 
+  // Two tiers, segregated by trust: curated findings ("what stands out") and
+  // discovered surprising links (the provisional, LLM-found tier). The focus
+  // panel is shared; the list keeps the boundary visible.
+  const findings = useMemo(() => lensInsights.filter((i) => i.origin === "curated"), [lensInsights]);
+  const links = useMemo(() => lensInsights.filter((i) => i.origin === "discovered"), [lensInsights]);
+
+  // Focus defaults to the first finding, then falls back to the first link.
+  const focusOrder = useMemo(() => [...findings, ...links], [findings, links]);
+
   const focused = useMemo<Insight | null>(() => {
     if (focusedId) {
-      const found = lensInsights.find((i) => i.id === focusedId);
+      const found = focusOrder.find((i) => i.id === focusedId);
       if (found) return found;
     }
-    return lensInsights[0] ?? null;
-  }, [focusedId, lensInsights]);
+    return focusOrder[0] ?? null;
+  }, [focusedId, focusOrder]);
 
   const tally = useMemo(() => {
-    const t = { high: 0, watch: 0, info: 0, surprising: 0 };
-    lensInsights.forEach((i) => {
-      t[i.severity]++;
-      if (i.isSurprisingLink) t.surprising++;
-    });
+    const t = { high: 0, watch: 0, info: 0, surprising: links.length };
+    findings.forEach((i) => t[i.severity]++);
     return t;
-  }, [lensInsights]);
+  }, [findings, links]);
 
   return {
     isLoading: !loaded,
-    lensInsights,
+    findings,
+    links,
     focused,
     tally,
     focusInsight: setFocusedId,

@@ -4,7 +4,9 @@ const T = 1_767_225_600_000;
 
 /* Per-lens insights — the opinion / critique layer.
    Each carries a claim, evidence, a self-critiquing "Bricklayer's Read",
-   and dig-deeper follow-ups. isSurprisingLink flags LLM-found correlations. */
+   and dig-deeper follow-ups. origin = "curated" (a prescriptive finding) or
+   "discovered" (an LLM-found surprising link). relatedReportId is the chart the
+   Read reasons over — every insight has one so the focus panel always renders. */
 export const seedInsights: Insight[] = [
   /* ---------------- Portfolio Manager ---------------- */
   {
@@ -18,7 +20,7 @@ export const seedInsights: Insight[] = [
     ],
     bricklaysRead: "The concentration is real but not yet a policy breach — it sits under the 25% single-class soft limit. What I'd watch is that half the growth is one metro (Austin + Nashville multifamily); geographic concentration is the sharper risk than asset-class here. Recommend a metro-level cut before escalating.",
     followUps: ["Break down by metro", "Show vs. policy limits", "Project next 2 quarters"],
-    isSurprisingLink: false, relatedReportId: "rep-value-by-class", createdAt: T,
+    origin: "curated", relatedReportId: "rep-value-by-class", createdAt: T,
   },
   {
     id: "ins-pm-2", lens: "portfolio-manager", kind: "correlation", severity: "watch",
@@ -31,7 +33,7 @@ export const seedInsights: Insight[] = [
     ],
     bricklaysRead: "Be careful reading causation here. The −0.61 is inflated by the office sub-book, where a handful of distressed, half-empty towers drag both variables at once. Strip office out and the correlation drops to −0.38. It's a real signal, but it's mostly an office story, not a book-wide law.",
     followUps: ["Show correlation matrix", "Exclude office", "Which properties drive it?"],
-    isSurprisingLink: true, relatedReportId: "rep-correlation", createdAt: T,
+    origin: "discovered", relatedReportId: "rep-correlation", createdAt: T,
   },
   {
     id: "ins-pm-3", lens: "portfolio-manager", kind: "premium", severity: "info",
@@ -44,7 +46,7 @@ export const seedInsights: Insight[] = [
     ],
     bricklaysRead: "This premium is likely overstated. Renovation dates are self-reported in the appraisal narrative and extraction confidence on that field averages 74% — the lowest of any field we pull. Treat the direction as sound, the magnitude as soft, until the field is verified.",
     followUps: ["Show extraction confidence", "By class", "List renovated assets"],
-    isSurprisingLink: false, createdAt: T,
+    origin: "curated", relatedReportId: "rep-psf-by-class", createdAt: T,
   },
 
   /* ---------------- Credit / Lending Officer ---------------- */
@@ -59,7 +61,7 @@ export const seedInsights: Insight[] = [
     ],
     bricklaysRead: "The headline count overstates the credit exposure. Roughly 40% of the stale set is stabilized industrial with occupancy above 95% — low reprice risk even when old. The genuine concern is the ~180 office assets that are both stale AND sub-75% occupied. That's the subset I'd pull into a refresh queue first, not all 1,233.",
     followUps: ["Show staleness heatmap", "Filter stale + low-occupancy", "Build a refresh queue"],
-    isSurprisingLink: false, relatedReportId: "rep-staleness", createdAt: T,
+    origin: "curated", relatedReportId: "rep-staleness", createdAt: T,
   },
   {
     id: "ins-co-2", lens: "credit-officer", kind: "concentration", severity: "high",
@@ -72,7 +74,7 @@ export const seedInsights: Insight[] = [
     ],
     bricklaysRead: "This is almost certainly a data-entry artifact, not a real distressed cap rate. The underlying NOI ($4.82M) and value ($54.2M) imply a 8.9% cap, not 11.4% — the recorded figure looks like a transposed input. Exclude it and re-run the vintage regression before this reaches a credit memo; leaving it in overstates office stress book-wide.",
     followUps: ["Re-run without outlier", "Open 1400 Market St", "Show the source page"],
-    isSurprisingLink: false, relatedReportId: "rep-value-vs-cap", createdAt: T,
+    origin: "curated", relatedReportId: "rep-value-vs-cap", createdAt: T,
   },
   {
     id: "ins-co-3", lens: "credit-officer", kind: "premium", severity: "watch",
@@ -85,7 +87,7 @@ export const seedInsights: Insight[] = [
     ],
     bricklaysRead: "Zone alone isn't the risk — three of these VE assets carry current flood coverage and elevation certificates, which the appraisal notes but our tile doesn't yet surface. The uninsured slice is what matters; on today's data that's two properties, ~$110M. I'd narrow the flag to those rather than the full $1.31B.",
     followUps: ["Show flood exposure map", "Filter uninsured", "By asset class"],
-    isSurprisingLink: false, relatedReportId: "rep-flood", createdAt: T,
+    origin: "curated", relatedReportId: "rep-flood", createdAt: T,
   },
 
   /* ---------------- Chief Appraiser ---------------- */
@@ -100,7 +102,7 @@ export const seedInsights: Insight[] = [
     ],
     bricklaysRead: "High volume isn't proof of low quality — but the pattern here is worth a review. Whitfield's reports average 3.6 comps against a 6.8 book norm, and three of the four highest-CoV appraisals in the book are his. That's a quality-control signal, not just a capacity one. Suggest a sample re-review of the stale, thin-comp subset before drawing conclusions.",
     followUps: ["Show workload chart", "List Whitfield's high-CoV reports", "Compare comp counts"],
-    isSurprisingLink: false, relatedReportId: "rep-workload", createdAt: T,
+    origin: "curated", relatedReportId: "rep-workload", createdAt: T,
   },
   {
     id: "ins-ca-2", lens: "chief-appraiser", kind: "data-health", severity: "watch",
@@ -113,7 +115,7 @@ export const seedInsights: Insight[] = [
     ],
     bricklaysRead: "The low NOI confidence is concentrated in scanned/handwritten income statements, not the model — 88% of low-confidence NOI pulls come from pre-2015 PDFs. That's fixable with a targeted re-OCR pass on ~600 documents rather than a model change. I'd scope that before flagging the field as unreliable in downstream widgets.",
     followUps: ["Show QA by field", "Filter low-confidence NOI", "Which documents?"],
-    isSurprisingLink: false, relatedReportId: "rep-extraction", createdAt: T,
+    origin: "curated", relatedReportId: "rep-extraction", createdAt: T,
   },
   {
     id: "ins-ca-3", lens: "chief-appraiser", kind: "correlation", severity: "info",
@@ -126,6 +128,6 @@ export const seedInsights: Insight[] = [
     ],
     bricklaysRead: "This is expected — older reports predate the current comp-sourcing tooling, so higher CoV is more about vintage of process than analyst error. The actionable read: prioritize refresh for the high-CoV stale set, since those valuations are both old and built on shaky comps. It doubles as a data-quality and a credit argument.",
     followUps: ["Show CoV vs age scatter", "List high-CoV stale", "Add to refresh queue"],
-    isSurprisingLink: true, createdAt: T,
+    origin: "discovered", relatedReportId: "rep-correlation", createdAt: T,
   },
 ];

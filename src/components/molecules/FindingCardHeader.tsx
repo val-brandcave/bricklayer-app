@@ -1,18 +1,18 @@
 import { AlertTriangle, Clock, GitBranch, Layers, Link2, ShieldCheck, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Pill, severityTone } from "@/components/atoms/Pill";
-import type { InsightKind, Severity } from "@/types";
+import type { InsightKind, InsightOrigin, Severity } from "@/types";
 
 /* FindingCardHeader — the top row of an Insight card: a kind glyph, the claim
-   title, a severity pill, and (when the finding is an LLM-discovered
-   correlation) a "surprising link" flag. Presentational; the parent card owns
-   entrance animation and the claim → evidence → Read body. */
+   title, a severity pill, and (when the insight is an LLM-discovered
+   correlation, i.e. origin "discovered") a "surprising link" flag.
+   Presentational; the parent card owns entrance animation and the body. */
 
 export interface FindingCardHeaderProps {
   title: string;
   kind: InsightKind;
   severity: Severity;
-  isSurprisingLink?: boolean;
+  origin?: InsightOrigin;
 }
 
 const KIND_META: Record<InsightKind, { icon: LucideIcon; label: string }> = {
@@ -30,9 +30,10 @@ const SEVERITY_LABEL: Record<Severity, string> = {
   high: "High",
 };
 
-export function FindingCardHeader({ title, kind, severity, isSurprisingLink = false }: FindingCardHeaderProps) {
+export function FindingCardHeader({ title, kind, severity, origin = "curated" }: FindingCardHeaderProps) {
   const meta = KIND_META[kind];
   const KindIcon = meta.icon;
+  const isDiscovered = origin === "discovered";
   return (
     <div style={{ display: "flex", alignItems: "flex-start", gap: "var(--s-3)" }}>
       <span
@@ -43,9 +44,9 @@ export function FindingCardHeader({ title, kind, severity, isSurprisingLink = fa
           height: 34,
           flexShrink: 0,
           borderRadius: "var(--r-md)",
-          background: "var(--surface-2)",
-          color: "var(--body)",
-          border: "1px solid var(--hairline)",
+          background: isDiscovered ? "var(--primary-soft)" : "var(--surface-2)",
+          color: isDiscovered ? "var(--primary)" : "var(--body)",
+          border: `1px solid ${isDiscovered ? "color-mix(in srgb, var(--primary) 26%, transparent)" : "var(--hairline)"}`,
         }}
       >
         <KindIcon size={17} strokeWidth={2} aria-hidden />
@@ -67,7 +68,7 @@ export function FindingCardHeader({ title, kind, severity, isSurprisingLink = fa
           <Pill tone={severityTone[severity]} size="sm" dot>
             {SEVERITY_LABEL[severity]}
           </Pill>
-          {isSurprisingLink && (
+          {isDiscovered && (
             <Pill tone="primary" size="sm">
               <Link2 size={11} strokeWidth={2.5} aria-hidden style={{ marginRight: 1 }} />
               Surprising link
