@@ -19,4 +19,6 @@ export { SearchField } from "./SearchField";
 export type { SearchFieldProps } from "./SearchField";
 export { StatTile } from "./StatTile";
 export type { StatTileProps, DeltaDirection } from "./StatTile";
+export { TodayDigest } from "./TodayDigest";
+export type { TodayDigestProps } from "./TodayDigest";
 export { SummonButton } from "./SummonButton";

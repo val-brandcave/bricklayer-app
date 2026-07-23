@@ -23,6 +23,7 @@ export function TopBar() {
   const chatNavExpanded = useUIStore((s) => s.chatNavExpanded);
   const toggleChatNav = useUIStore((s) => s.toggleChatNav);
   const crumb = useUIStore((s) => s.crumb);
+  const crumbBack = useUIStore((s) => s.crumbBack);
   const pathname = usePathname();
   const base = ROUTE_LABEL[Object.keys(ROUTE_LABEL).find((r) => pathname.startsWith(r)) ?? ""] ?? "";
 
@@ -80,19 +81,34 @@ export function TopBar() {
         {collapsed ? <PanelLeftOpen size={18} strokeWidth={2} /> : <PanelLeftClose size={18} strokeWidth={2} />}
       </button>
 
-      {/* breadcrumb / current page — doubles as the drill-down trail */}
+      {/* breadcrumb / current page — doubles as the drill-down trail. In a
+          drill-down (crumb set) the base label becomes the way back. */}
       {base && (
         <nav aria-label="Breadcrumb" style={{ display: "flex", alignItems: "center", gap: 4, minWidth: 0, flex: "0 1 auto" }}>
-          <span
-            style={{
-              fontSize: 14.5,
-              fontWeight: crumb ? 500 : 650,
-              color: crumb ? "var(--muted)" : "var(--ink)",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {base}
-          </span>
+          {crumb && crumbBack ? (
+            <button
+              type="button"
+              onClick={crumbBack}
+              style={{
+                fontSize: 14.5,
+                fontWeight: 500,
+                color: "var(--muted)",
+                whiteSpace: "nowrap",
+                border: "none",
+                background: "transparent",
+                padding: 0,
+                font: "inherit",
+                cursor: "pointer",
+                transition: "color var(--dur)",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--primary)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted)")}
+            >
+              {base}
+            </button>
+          ) : (
+            <span style={{ fontSize: 14.5, fontWeight: 650, color: "var(--ink)", whiteSpace: "nowrap" }}>{base}</span>
+          )}
           {crumb && (
             <>
               <ChevronRight size={15} strokeWidth={2.2} style={{ color: "var(--faint)", flexShrink: 0 }} aria-hidden />

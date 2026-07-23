@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, Building2, CalendarClock, Droplets, MapPin, TriangleAlert } from "lucide-react";
+import { Building2, CalendarClock, Droplets, MapPin, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/atoms/Button";
 import { EmblemMark } from "@/components/atoms/EmblemMark";
 import { Pill } from "@/components/atoms/Pill";
@@ -18,7 +18,6 @@ import type { ScenarioBase } from "@/data/datasets";
 
 export interface PropertyDetailProps {
   row: PropertyRow;
-  onBack: () => void;
   onAskAbout: (context: string) => void;
 }
 
@@ -30,7 +29,7 @@ function fmtDate(ts: number): string {
    row. Header identity + a KPI row, then the latest-appraisal detail (with
    provenance) alongside the per-property valuation widgets, and the watchlist
    rationale when the asset is flagged. Every number points back to its source. */
-export function PropertyDetail({ row, onBack, onAskAbout }: PropertyDetailProps) {
+export function PropertyDetail({ row, onAskAbout }: PropertyDetailProps) {
   const { property: p, appraisal: a, watch } = row;
   const status = STATUS_META[p.valuationStatus];
 
@@ -57,21 +56,8 @@ export function PropertyDetail({ row, onBack, onAskAbout }: PropertyDetailProps)
     : { label: "No appraisal on file" };
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible" style={{ padding: `var(--s-4) ${PAGE_GUTTER} var(--s-12)` }}>
-      {/* back */}
-      <motion.div variants={staggerItem}>
-        <button
-          type="button"
-          onClick={onBack}
-          style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 10px 6px 6px", margin: "0 0 var(--s-4) -6px", borderRadius: "var(--r-md)", border: "none", background: "transparent", color: "var(--muted)", font: "inherit", fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "color var(--dur), background var(--dur)" }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = "var(--ink)"; e.currentTarget.style.background = "var(--surface-3)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = "var(--muted)"; e.currentTarget.style.background = "transparent"; }}
-        >
-          <ArrowLeft size={16} strokeWidth={2.2} /> All properties
-        </button>
-      </motion.div>
-
-      {/* header */}
+    <motion.div variants={staggerContainer} initial="hidden" animate="visible" style={{ padding: `var(--s-6) ${PAGE_GUTTER} var(--s-12)` }}>
+      {/* header — back to the list is the breadcrumb's "Properties" (top bar) */}
       <motion.header variants={staggerItem} style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "var(--s-5)", flexWrap: "wrap", marginBottom: "var(--s-6)" }}>
         <div style={{ minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>

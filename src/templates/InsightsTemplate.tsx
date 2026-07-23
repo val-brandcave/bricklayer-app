@@ -1,9 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Link2, Sparkles, TriangleAlert } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { FindingCard } from "@/components/molecules/FindingCard";
-import { PageHeader, PAGE_GUTTER } from "@/components/molecules/PageHeader";
+import { PAGE_GUTTER } from "@/components/molecules/PageHeader";
+import { TodayDigest } from "@/components/molecules/TodayDigest";
 import { InsightsFocusPanel } from "@/components/organisms/InsightsFocusPanel";
 import { Skeleton } from "@/components/atoms/Skeleton";
 import { staggerContainer, staggerItem } from "@/lib/motion";
@@ -17,7 +18,6 @@ export interface InsightsTemplateProps {
   links: Insight[];
   focused: Insight | null;
   focusedReport: Report | null;
-  tally: { high: number; watch: number; info: number; surprising: number };
   onFocus: (id: string) => void;
   onFollowUp: (prompt: string) => void;
   onAsk: (prompt: string) => void;
@@ -26,39 +26,29 @@ export interface InsightsTemplateProps {
   onDismiss: (id: string) => void;
 }
 
-/* InsightsTemplate — the per-lens landing: a greeting + severity tally over a
-   master-detail. The list segregates the two insight tiers — curated
-   "what stands out" findings, then the LLM-discovered "surprising links" with
-   a caveat header and exploratory styling — while a single focus panel adapts
-   its detail by type. The opinion layer, not a dashboard copy. Structure only. */
+/* InsightsTemplate — the per-lens landing: a personal greeting sits as a plain
+   line over the TODAY digest (the book-wide synthesis), then the master-detail.
+   The list segregates the two insight tiers — curated "what stands out"
+   findings, then the LLM-discovered "surprising links" with a caveat header and
+   exploratory styling — while a single focus panel adapts its detail by type.
+   No header strip and no tally chips: the counts live in the TODAY read. */
 export function InsightsTemplate({
-  isLoading, lens, findings, links, focused, focusedReport, tally,
+  isLoading, lens, findings, links, focused, focusedReport,
   onFocus, onFollowUp, onAsk, onOpenBoard, onPin, onDismiss,
 }: InsightsTemplateProps) {
   const meta = LENSES[lens];
-  const total = findings.length + links.length;
   const firstName = meta.userName.split(" ")[0];
 
   return (
-    <>
-      <PageHeader
-        left={
-          <h1 style={{ fontSize: 21, fontWeight: 680, margin: 0, lineHeight: 1.15 }}>
-            {greeting()}, <span style={{ color: "var(--muted)", fontWeight: 600 }}>{firstName}</span>
-          </h1>
-        }
-        right={
-          !isLoading && total > 0 ? (
-            <>
-              {tally.high > 0 && <TallyChip icon={TriangleAlert} tone="danger" label={`${tally.high} high`} />}
-              {tally.watch > 0 && <TallyChip icon={TriangleAlert} tone="warning" label={`${tally.watch} to watch`} />}
-              {tally.surprising > 0 && <TallyChip icon={Link2} tone="primary" label={`${tally.surprising} surprising ${tally.surprising === 1 ? "link" : "links"}`} />}
-            </>
-          ) : undefined
-        }
-      />
+    <div style={{ padding: `var(--s-6) ${PAGE_GUTTER} var(--s-12)`, display: "flex", flexDirection: "column", gap: "var(--s-5)" }}>
+      {/* personal greeting — an orphaned line, not a header strip */}
+      <h1 style={{ fontSize: 22, fontWeight: 680, margin: 0, lineHeight: 1.15 }}>
+        {greeting()}, <span style={{ color: "var(--muted)", fontWeight: 600 }}>{firstName}</span>
+      </h1>
 
-      <div style={{ padding: `var(--s-6) ${PAGE_GUTTER} var(--s-12)` }}>
+      {/* The book-wide "TODAY" read — the state of the book, before the drill. */}
+      <TodayDigest lens={lens} findingCount={findings.length} linkCount={links.length} isLoading={isLoading} />
+
         <div style={{ display: "grid", gridTemplateColumns: "minmax(320px, 400px) minmax(0, 1fr)", gap: "var(--s-6)", alignItems: "start" }}>
           {isLoading ? (
             <div style={{ display: "flex", flexDirection: "column", gap: "var(--s-3)" }}>
@@ -109,8 +99,7 @@ export function InsightsTemplate({
             />
           )}
         </div>
-      </div>
-    </>
+    </div>
   );
 }
 
@@ -134,15 +123,4 @@ function greeting(): string {
   if (h < 12) return "Good morning";
   if (h < 18) return "Good afternoon";
   return "Good evening";
-}
-
-function TallyChip({ icon: Icon, tone, label }: { icon: React.ComponentType<{ size?: number; strokeWidth?: number }>; tone: "danger" | "warning" | "primary"; label: string }) {
-  const color = tone === "danger" ? "var(--danger)" : tone === "warning" ? "var(--warning)" : "var(--primary)";
-  const bg = tone === "danger" ? "var(--danger-soft)" : tone === "warning" ? "var(--warning-soft)" : "var(--primary-soft)";
-  return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 11px", borderRadius: "var(--r-pill)", background: bg, color, fontSize: 12.5, fontWeight: 600 }}>
-      <Icon size={13} strokeWidth={2.2} />
-      {label}
-    </span>
-  );
 }

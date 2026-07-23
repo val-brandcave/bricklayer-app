@@ -33,6 +33,10 @@ interface UIState {
   toggleNav: () => void;
   setNavCollapsed: (collapsed: boolean) => void;
 
+  // Insights "TODAY" digest collapsed to its bar (returning-user preference).
+  todayCollapsed: boolean;
+  toggleTodayCollapsed: () => void;
+
   // On /chat the main nav auto-collapses to icons (route-driven, so every entry
   // into the full-page chat looks identical). This session-only flag lets the
   // user manually re-expand it there without disturbing the persisted global
@@ -48,6 +52,11 @@ interface UIState {
   // the base page label is derived from the route in the TopBar.
   crumb: string | null;
   setCrumb: (crumb: string | null) => void;
+
+  // When a drill-down sets a crumb, it also registers how to go back (e.g.
+  // deselect the property) so the breadcrumb's base label becomes the way out.
+  crumbBack: (() => void) | null;
+  setCrumbBack: (fn: (() => void) | null) => void;
 
   // a chat MCP app being dragged toward a dashboard (drag-to-dashboard);
   // the grid reads its size to preview the drop. Null when not dragging.
@@ -67,6 +76,23 @@ function readNavCollapsed(): boolean {
 function persistNavCollapsed(collapsed: boolean) {
   try {
     localStorage.setItem("bricklayer:nav-collapsed", collapsed ? "1" : "0");
+  } catch {
+    /* ignore */
+  }
+}
+
+function readFlag(key: string): boolean {
+  if (typeof localStorage === "undefined") return false;
+  try {
+    return localStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function persistFlag(key: string, on: boolean) {
+  try {
+    localStorage.setItem(key, on ? "1" : "0");
   } catch {
     /* ignore */
   }
@@ -124,6 +150,13 @@ export const useUIStore = create<UIState>((set, get) => ({
     set({ navCollapsed });
   },
 
+  todayCollapsed: readFlag("bricklayer:today-collapsed"),
+  toggleTodayCollapsed: () => {
+    const next = !get().todayCollapsed;
+    persistFlag("bricklayer:today-collapsed", next);
+    set({ todayCollapsed: next });
+  },
+
   chatNavExpanded: false,
   toggleChatNav: () => set((s) => ({ chatNavExpanded: !s.chatNavExpanded })),
 
@@ -132,6 +165,9 @@ export const useUIStore = create<UIState>((set, get) => ({
 
   crumb: null,
   setCrumb: (crumb) => set({ crumb }),
+
+  crumbBack: null,
+  setCrumbBack: (crumbBack) => set({ crumbBack }),
 
   dragReport: null,
   setDragReport: (dragReport) => set({ dragReport }),

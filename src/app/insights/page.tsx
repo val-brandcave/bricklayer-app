@@ -19,7 +19,7 @@ export default function InsightsPage() {
   const router = useRouter();
   const lens = useUIStore((s) => s.lens);
   const openChat = useUIStore((s) => s.openChat);
-  const { isLoading, findings, links, focused, tally, focusInsight, dismissInsight } = useInsights();
+  const { isLoading, findings, links, focused, focusInsight, dismissInsight } = useInsights();
   const { reports } = useReports();
   const { lensDashboards, addTile } = useDashboards();
 
@@ -59,7 +59,6 @@ export default function InsightsPage() {
       links={links}
       focused={focused}
       focusedReport={focusedReport}
-      tally={tally}
       onFocus={focusInsight}
       onFollowUp={onFollowUp}
       onAsk={onAsk}
