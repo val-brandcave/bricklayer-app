@@ -4,6 +4,8 @@ Bricklayer is RealWired's AI/BI **intelligence suite for banks**: it turns a ban
 
 > **Product source of truth:** `docs/DIRECTION-v2-hubspot-anchored.md`. Read it before building product surfaces. The discovery artifacts in `docs/artifacts/*.html` show every pattern (widget library, Insights, IA, flows) — they are the visual spec (styled in the Voltagent discovery wrapper; the **app** uses our own design system, below).
 
+> **Wiring this to real data?** Start with **`docs/INTEGRATING-REAL-DATA.md`** — the swap happens in the adapter layer only (`src/data/adapters/api-adapter.ts` + one env var); no UI code changes. That doc also reconciles what the prototype *simulates* (curated chart data, the chat router, authored Insights copy) and still needs wiring.
+
 ---
 
 ## Golden rules (non-negotiable)
